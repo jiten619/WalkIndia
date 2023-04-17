@@ -11,7 +11,9 @@ import Coin from './Coin';
 import CoinsContainer  from './CoinsContainer';
 import StepCounter from './stepCounter'; 
 
-const backgroundImage = { uri: 'https://img.freepik.com/free-vector/city-runner-cartoon-concept-with-group-young-people-running-outdoors-vector-illustration_1284-81128.jpg' };
+
+const backgroundImage = { uri: 'https://img.freepik.com/premium-vector/marathon-runner-silhouette_40382-251.jpg?w=740' };
+
 
 const HomeScreen = () => {
   const [steps, setSteps] = React.useState(0);

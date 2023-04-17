@@ -32,7 +32,7 @@ const App = () => {
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ title: 'Welcome', headerShown: false }} />
         <Stack.Screen name="InviteCode" component={InviteCodeScreen}  options={{ title: 'Welcome', headerShown: false }}/>
         <Stack.Screen name="FeedBack" component={FeedBackScreen} options={{ title: 'Welcome', headerShown: false }} />
-        <Stack.Screen name="WalletPage" component={WalletPage} options={{ title: 'Welcome', headerShown: false }} />
+        <Stack.Screen name="WalletScreen" component={WalletScreen} options={{ title: 'Welcome', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

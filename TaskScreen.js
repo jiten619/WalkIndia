@@ -5,7 +5,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Navbar from './NavBar';
@@ -144,11 +143,11 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    backgroundColor: '#eee',
+    backgroundColor: '#57F28D',
     paddingHorizontal: 20,
   },
   inviteContainer: {
-    backgroundColor: '#00cc00',
+    backgroundColor: '#5750A1',
     borderRadius: 50,
     padding: 20,
     marginVertical: 20,
@@ -159,6 +158,9 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
     marginBottom: 10,
+    color:'white',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   taskContainer1: {
     marginVertical: 10,

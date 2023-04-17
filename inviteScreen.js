@@ -8,10 +8,7 @@ import {
   Share,
   Clipboard,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
-import { createStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 
@@ -39,15 +36,10 @@ const InviteScreen = () => {
     
     
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-        
+        <Navbar/>
     <View style={styles.container}>
       {/* Top invite button */}
-
-      <View style={styles.navbar}>
-        {/* Add navbar content here */}
-        <Navbar />
-      </View>
-       
+      
       <TouchableOpacity style={styles.topButton} onPress={shareApp}>
         <Text style={styles.buttonText}>Invite Friends To Earn More</Text>
       </TouchableOpacity>
@@ -107,14 +99,13 @@ const InviteScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#26D912',
-    // paddingHorizontal: 20,
-    // paddingVertical: 30,
+    backgroundColor: '#57F28D',
   },
   topButton: {
     backgroundColor: '#02B2FE',
     paddingVertical: 15,
     borderRadius: 50,
+    marginTop: 20,
     marginBottom: 20,
     marginLeft: 10,
     marginRight: 10,
@@ -135,7 +126,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingHorizontal: 10,
     paddingVertical: 15,
-    backgroundColor: '#00ffaa',
+    backgroundColor: '#7D6C95',
     marginLeft: 10,
     marginRight: 10,
   },
@@ -232,16 +223,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderTopWidth: 2,
     borderTopColor: '#ccc',
-  },
-  navbar: {
-    height: 60,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-    paddingBottom: 10,
   },
 });
 

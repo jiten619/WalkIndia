@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, value } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 
 const WalletPage = () => {
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
