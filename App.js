@@ -12,10 +12,11 @@ import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import InviteCodeScreen from './InviteCodeScreen';
 import FeedBackScreen from './FeedBackScreen';
 import WalletPage from './WalletScreen';
-import { PermissionsAndroid } from 'react-native';
+
 
 const Stack = createNativeStackNavigator();
 const store = createStore(reducer);
+
 
 
 const App = () => {
@@ -23,6 +24,8 @@ const App = () => {
     // <Provider store={store}>
     //   <PermissionsAndroid />
     // </Provider>
+    
+    
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Welcome', headerShown: false }} />
@@ -32,9 +35,10 @@ const App = () => {
         <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ title: 'Welcome', headerShown: false }} />
         <Stack.Screen name="InviteCode" component={InviteCodeScreen}  options={{ title: 'Welcome', headerShown: false }}/>
         <Stack.Screen name="FeedBack" component={FeedBackScreen} options={{ title: 'Welcome', headerShown: false }} />
-        <Stack.Screen name="WalletScreen" component={WalletScreen} options={{ title: 'Welcome', headerShown: false }} />
+        <Stack.Screen name="WalletPage" component={WalletPage} options={{ title: 'Welcome', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
+    
   );
 };
 

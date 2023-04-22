@@ -1,11 +1,29 @@
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Pedometer } from 'expo-sensors';
 
 const TodayHealthDataContainer = () => {
   const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
   const [timeToWalk, setTimeToWalk] = React.useState(0); // time to walk in minutes
   const [caloriesBurned, setCaloriesBurned] = React.useState(0); // calories burned
+  const [steps, setSteps] = React.useState(0); // step count
+
+  React.useEffect(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const subscription = Pedometer.watchStepCount(result => {
+      if (result && result.steps !== undefined) {
+        setSteps(result.steps);
+        setDistanceWalked(result.steps * 0.5 / 1000); // assuming 0.5 meters per step
+        setTimeToWalk(result.steps * 0.5 / 80); // assuming 80 steps per minute
+        setCaloriesBurned(result.steps * 0.05); // assuming 0.05 calories burned per step
+      }
+    }, today);
+
+    return () => subscription.remove();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -13,7 +31,7 @@ const TodayHealthDataContainer = () => {
         <Icon name="stats-chart-outline" size={15} color={'lightgreen'} />
         <Text style={styles.title}>Today's Health data</Text>
       </View>
-      
+
       <View style={styles.dataContainer}>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>
@@ -25,14 +43,14 @@ const TodayHealthDataContainer = () => {
          </Text>
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
-          <Text style={styles.dataText}>{timeToWalk} min</Text>
+          <Text style={styles.dataText}>{timeToWalk.toFixed()} min</Text>
           <Icon name="time-outline" size={15} />
           <Text style={{ marginLeft: 5, }}>
            Time
          </Text>
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
-          <Text style={styles.dataText}>{caloriesBurned} cal</Text>
+          <Text style={styles.dataText}>{caloriesBurned.toFixed()} cal</Text>
           <Icon name="flame-outline" size={15} />
           <Text style={{ marginLeft: 5, }}>
            Calories
@@ -40,7 +58,7 @@ const TodayHealthDataContainer = () => {
         </View>
       </View>
       <View style={styles.moreContainer}>
-      
+
         <Text style={styles.moreText}>More</Text>
         <Icon name='caret-forward' size={12} color='#000000' />
       </View>
@@ -58,6 +76,7 @@ const styles = StyleSheet.create({
     height: 120,
     marginHorizontal: 20,
     marginBottom: 190,
+    marginTop: 70,
   },
   titleContainer: {
     position: 'absolute',

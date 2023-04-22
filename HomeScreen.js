@@ -1,72 +1,38 @@
 import React, { useState, useEffect} from 'react';
-import { StyleSheet, View, Text, TouchableOpacity,ImageBackground, SafeAreaView } from 'react-native';
-import { ProgressBar } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/Ionicons';
+import { StyleSheet, View, Text, TouchableOpacity,ImageBackground } from 'react-native';
 import { Pedometer } from 'expo-sensors';
 import TodayHealthDataContainer from './healthContainer';
-import HalfCurveProgressBar from './ProgressBar';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
-import Coin from './Coin';
-import CoinsContainer  from './CoinsContainer';
-import StepCounter from './stepCounter'; 
+import CircularProgress from 'react-native-circular-progress-indicator';
 
 
-const backgroundImage = { uri: 'https://img.freepik.com/premium-vector/marathon-runner-silhouette_40382-251.jpg?w=740' };
+const backgroundImage = { uri: 'https://img.freepik.com/premium-photo/young-man-runner-running-running-road-city-park_41380-381.jpg?w=740' };
 
 
 const HomeScreen = () => {
-  const [steps, setSteps] = React.useState(0);
-  const [progress, setProgress] = React.useState(0);
+  const [PedometerAvailability, setPedometerAvailability] = useState('')
+  const [stepCount, updateStepCount] = useState(0);
+ 
+  useEffect(()=> {
+    subscribe();
+  }, [])
 
-  React.useEffect(() => {
-    // Add code to access pedometer data and update steps count
-class App extends React.Component {
-  state = {
-    steps: 0,
-  };
-
-  componentDidMount() {
-    this.subscription = Pedometer.watchStepCount(result => {
-      this.setState({
-        steps: result.steps,
-      });
-    });
-
-    // You can also get the current step count
-    Pedometer.getStepCountAsync().then(result => {
-      this.setState({
-        steps: result.steps,
-      });
-    });
-  }
-
-  componentWillUnmount() {
-    this.subscription && this.subscription.remove();
-    this.subscription = null;
-  }
-
-  render() {
-    return (
-      <View>
-        <Text>Steps taken: {this.state.steps}</Text>
-      </View>
+  subscribe = () => {
+    const subscription = Pedometer.watchStepCount((result) => {
+      updateStepCount(result.steps)
+    })
+     
+    Pedometer.isAvailableAsync().then(
+      (result) => {
+        setPedometerAvailability(String(result));
+      } , 
+      (error) => {
+        setPedometerAvailability(error);
+      }
     );
+
   }
-}
-let subscription = Pedometer.watchStepCount(result => {
-  setSteps(result.steps);
-  setProgress(result.steps / 10000); //set progress bar to show percentage of goals completed
-});
-
-
-return () => {
-  subscription && subscription.remove();
-  subscription = null;
-};
-  }, []);
-  
-
 
   const collectReward = () => {
     // Here you can add the logic to generate the number of reward coins randomly and add them to the user's wallet 
@@ -74,18 +40,34 @@ return () => {
     console.log(`Collected ${randomCoins} coins as a reward!`);
   };
 
-  
-  
 
   return (
     <View  style={styles.container}>
       <ImageBackground source={backgroundImage} style={styles.backgroundImage} >
+    
       <Navbar />
-      <View style={styles.progressContainer}>
-        {/* <CoinsContainer/> */}
-         <HalfCurveProgressBar progress={progress} />
-        {/* <Text style={styles.stepsText}>{steps} Steps</Text> */}
-        <StepCounter/>
+      <View style={styles.progressContainer}> 
+      <CircularProgress 
+         value= {stepCount}
+         maxValue={6500}
+         radius={80}
+         textColor={'#ECF0F1'}
+         activeStrokeColor={'#FDC702'}
+         inActiveStrokeColor={'white'}
+         inActiveStrokeOpacity={0.5}
+         inActiveStrokeWidth={40}
+         activeStrokeWidth={40}
+         title={'Steps'}
+         titleColor={'#ECF0F1'}
+         style={{
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+           }}
+        />
+      </View>
+      
+      
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       <TouchableOpacity
         style={styles.rewardButton}
@@ -93,7 +75,7 @@ return () => {
         <Text style={styles.rewardButtonText}>Claim Coins</Text>
       </TouchableOpacity>
     </View>
-      </View>
+      
       <TodayHealthDataContainer />
       <FooterBar/>
       </ImageBackground>
@@ -119,23 +101,6 @@ const styles = StyleSheet.create({
     marginTop: 20, 
     marginHorizontal: 20,
   },
-  titleContainer: {
-    flexDirection: 'row',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 15,
-  },
-  walletContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  walletAmount: {
-    marginLeft: 5,
-    fontSize: 16,
-  },
   progressContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -153,7 +118,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 50,
     backgroundColor: '#2196f3',
     borderRadius: 15,
-    marginTop: 10,
+    marginBottom: -30,
   },
   rewardButtonText: {
     color: '#fff',

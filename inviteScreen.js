@@ -6,9 +6,9 @@ import {
   StyleSheet,
   Image,
   Share,
-  Clipboard,
   ScrollView,
 } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 
