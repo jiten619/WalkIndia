@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Pedometer } from 'expo-sensors';
+
 
 const TodayHealthDataContainer = () => {
   const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
@@ -58,9 +59,10 @@ const TodayHealthDataContainer = () => {
         </View>
       </View>
       <View style={styles.moreContainer}>
-
+        <TouchableOpacity>
         <Text style={styles.moreText}>More</Text>
         <Icon name='caret-forward' size={12} color='#000000' />
+        </TouchableOpacity> 
       </View>
     </View>
   );

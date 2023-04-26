@@ -5,6 +5,7 @@ import TodayHealthDataContainer from './healthContainer';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 import CircularProgress from 'react-native-circular-progress-indicator';
+import store from './store';
 
 
 const backgroundImage = { uri: 'https://img.freepik.com/premium-photo/young-man-runner-running-running-road-city-park_41380-381.jpg?w=740' };
@@ -13,7 +14,7 @@ const backgroundImage = { uri: 'https://img.freepik.com/premium-photo/young-man-
 const HomeScreen = () => {
   const [PedometerAvailability, setPedometerAvailability] = useState('')
   const [stepCount, updateStepCount] = useState(0);
- 
+
   useEffect(()=> {
     subscribe();
   }, [])
@@ -22,7 +23,7 @@ const HomeScreen = () => {
     const subscription = Pedometer.watchStepCount((result) => {
       updateStepCount(result.steps)
     })
-     
+
     Pedometer.isAvailableAsync().then(
       (result) => {
         setPedometerAvailability(String(result));
@@ -31,20 +32,21 @@ const HomeScreen = () => {
         setPedometerAvailability(error);
       }
     );
-
   }
 
   const collectReward = () => {
-    // Here you can add the logic to generate the number of reward coins randomly and add them to the user's wallet 
-    const randomCoins = Math.floor(Math.random() * (1000 - 0.1 + 1) + 0.1);
-    console.log(`Collected ${randomCoins} coins as a reward!`);
+    const percentageOfTarget = stepCount/6500; // Calculate the percentage of the total steps target reached by the user so far
+    const randomCoins = Math.floor(Math.random() * (1000 - 0.1 + 1) + 0.1); // Generate a random number of coins
+    const collectedReward = Math.round(percentageOfTarget * randomCoins); // Calculate the rewards based on the percentage of total steps reached
+    console.log(`Collected ${collectedReward} coins as a reward!`);
+    store.dispatch({ type: 'ADD_COINS', amount: collectedReward });
   };
 
 
   return (
     <View  style={styles.container}>
       <ImageBackground source={backgroundImage} style={styles.backgroundImage} >
-    
+
       <Navbar />
       <View style={styles.progressContainer}> 
       <CircularProgress 
@@ -66,8 +68,8 @@ const HomeScreen = () => {
            }}
         />
       </View>
-      
-      
+
+
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
       <TouchableOpacity
         style={styles.rewardButton}
@@ -75,12 +77,12 @@ const HomeScreen = () => {
         <Text style={styles.rewardButtonText}>Claim Coins</Text>
       </TouchableOpacity>
     </View>
-      
+
       <TodayHealthDataContainer />
       <FooterBar/>
       </ImageBackground>
     </View> 
-     
+
   );
 };
 
@@ -95,23 +97,10 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 20, 
-    marginHorizontal: 20,
-  },
   progressContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  progressBar: {
-    width: 200,
-  },
-  stepsText: {
-    marginTop: 10,
-    fontSize: 18,
   },
   rewardButton: {
     paddingVertical: 5,

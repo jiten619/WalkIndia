@@ -1,22 +1,19 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
-import HomeScreen from './HomeScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
-import reducer from './reducer';
+import HomeScreen from './HomeScreen';
 import TaskScreen from './TaskScreen';
 import InviteScreen from './inviteScreen';
-import ProfileScreen  from './ProfileScreen';
+import ProfileScreen from './ProfileScreen';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import InviteCodeScreen from './InviteCodeScreen';
 import FeedBackScreen from './FeedBackScreen';
 import WalletPage from './WalletScreen';
 
 
-const Stack = createNativeStackNavigator();
-const store = createStore(reducer);
 
+const Stack = createNativeStackNavigator();
 
 
 const App = () => {

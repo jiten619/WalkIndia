@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView } from 
 import { Picker } from '@react-native-picker/picker';
 
 
+
 const WalletPage = () => {
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
   const [withdrawableCoins, setWithdrawableCoins] = useState(0);
@@ -18,6 +19,7 @@ const WalletPage = () => {
   const [googlePayNumber, setGooglePayNumber] = useState('');
   const [phonePayNumber, setPhonePayNumber] = useState('');
   const [paytmNumber, setPaytmNumber] = useState('');
+  
 
   const handleWithdraw = () => {
     // Check if the withdraw amount is greater than or equal to 50,000

@@ -3,6 +3,8 @@
     "name": "WalkIndia",
     "slug": "WalkIndia",
     "version": "1.0.0",
+    "platforms": ["ios", "android"],
+    "package": "com.walkindia.Stepcoin",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
