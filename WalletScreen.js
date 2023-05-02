@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#5FA38B',
+    backgroundColor: '#F3FCFF',
     paddingHorizontal: 20,
     paddingTop: 40,
   },
@@ -256,9 +256,10 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#414141',
+    marginVertical: 10,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -283,11 +284,11 @@ const styles = StyleSheet.create({
   },
   inputSubText: {
     fontSize: 14,
-    color: '#fff',
+    color: 'black',
     marginTop: 10,
   },
   channelContainer: {
-    paddingTop: 20,
+    paddingTop: 30,
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
@@ -297,7 +298,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   cashOutButton: {
-    backgroundColor: '#0076FF',
+    backgroundColor: '#19B5FE',
     borderRadius: 5,
     alignItems: 'center',
     paddingVertical: 16,
@@ -314,6 +315,11 @@ const styles = StyleSheet.create({
   withdrawalHistoryContainer: {
     marginTop: 20,
     paddingBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   withdrawalHistoryLabel: {
     fontSize: 18,
@@ -327,9 +333,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+    marginVertical: 5,
   },
   withdrawalHistoryAmount: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: 'red',
     marginRight: 10,

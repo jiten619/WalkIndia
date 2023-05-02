@@ -132,15 +132,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  // navbar: {
-  //   height: 60,
-  //   backgroundColor: '#fff',
-  //   borderBottomWidth: 1,
-  //   borderBottomColor: '#ddd',
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   marginTop: 10,
-  // },
   scrollView: {
     flex: 1,
     backgroundColor: '#57F28D',

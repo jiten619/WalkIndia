@@ -8,7 +8,7 @@ import {
   Share,
   ScrollView,
 } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+import Clipboard from '@react-native-community/clipboard';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 

@@ -2,9 +2,11 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { Pedometer } from 'expo-sensors';
+import { useNavigation } from '@react-navigation/native';
 
 
 const TodayHealthDataContainer = () => {
+  const navigation = useNavigation();
   const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
   const [timeToWalk, setTimeToWalk] = React.useState(0); // time to walk in minutes
   const [caloriesBurned, setCaloriesBurned] = React.useState(0); // calories burned
@@ -59,7 +61,7 @@ const TodayHealthDataContainer = () => {
         </View>
       </View>
       <View style={styles.moreContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('StepsRecord')}>
         <Text style={styles.moreText}>More</Text>
         <Icon name='caret-forward' size={12} color='#000000' />
         </TouchableOpacity> 

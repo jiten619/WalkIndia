@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import {ImagePicker }from 'react-native-image-picker'; // Imported for image selection
+import ImagePicker from 'react-native-image-picker'; // Import ImagePicker
 
 const FeedbackScreen = () => {
   const [problem, setProblem] = useState('');
@@ -84,7 +84,7 @@ const FeedbackScreen = () => {
       </View>
       <Text style={styles.label}>3. Please describe your problem with a picture (choice):</Text>
       <View style={styles.imageContainer}>
-      
+
         <TouchableOpacity style={styles.imageButton} onPress={handleChooseImage}>
           {image ? (
             <Text style={styles.imageText}>Image Attached</Text>

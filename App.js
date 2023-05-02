@@ -10,6 +10,7 @@ import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 import InviteCodeScreen from './InviteCodeScreen';
 import FeedBackScreen from './FeedBackScreen';
 import WalletPage from './WalletScreen';
+import StepRecordPage from './StepRecordPage';
 
 
 
@@ -33,6 +34,7 @@ const App = () => {
         <Stack.Screen name="InviteCode" component={InviteCodeScreen}  options={{ title: 'Welcome', headerShown: false }}/>
         <Stack.Screen name="FeedBack" component={FeedBackScreen} options={{ title: 'Welcome', headerShown: false }} />
         <Stack.Screen name="WalletPage" component={WalletPage} options={{ title: 'Welcome', headerShown: false }} />
+        <Stack.Screen name="StepsRecord" component={StepRecordPage} options={{ title: 'Welcome', headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
     
