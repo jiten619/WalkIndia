@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import Icon from 'react-native-vector-icons/Ionicons';
+import FoundationIcon from 'react-native-vector-icons/Foundation';
+import { Pedometer } from 'expo-sensors';
 
 const screenWidth = Dimensions.get('window').width;
+
+
 
 const stepRecords = [
   { date: '2022-11-01', steps: 5000, distance: 2.5, time: '20:30', calories: 200 },
@@ -19,6 +23,37 @@ const stepRecords = [
 const StepRecordPage = ({ recordName }) => {
   const [stepCount, updateStepCount] = useState(0);
   const [selectedData, setSelectedData] = useState('week');
+  const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
+  const [timeToWalk, setTimeToWalk] = React.useState(0); // time to walk in minutes
+  const [caloriesBurned, setCaloriesBurned] = React.useState(0); // calories burned
+  const [steps, setSteps] = React.useState(0); // step count
+
+  useEffect(()=> {
+    subscribe();
+  }, [])
+
+  subscribe = () => {
+    const subscription = Pedometer.watchStepCount((result) => {
+      updateStepCount(result.steps)
+    })
+  }
+
+  React.useEffect(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const subscription = Pedometer.watchStepCount(result => {
+      if (result && result.steps !== undefined) {
+        setSteps(result.steps);
+        setDistanceWalked(result.steps * 0.5 / 1000); // assuming 0.5 meters per step
+        setTimeToWalk(result.steps * 0.5 / 80); // assuming 80 steps per minute
+        setCaloriesBurned(result.steps * 0.05); // assuming 0.05 calories burned per step
+      }
+    }, today);
+
+    return () => subscription.remove();
+  }, []);
+
 
   const getChartData = () => {
     let dataPoints = [];
@@ -143,29 +178,32 @@ const StepRecordPage = ({ recordName }) => {
           style={styles.chart}
         />
         <View style={styles.healthContainer}>
-          <View style={styles.healthItem}>
-            <Text style={styles.healthLabel}>Distance</Text>
-            <Icon name="walk-outline" size={15} />
-            <Text style={styles.healthValue}>
-              {getChartData().distance.toFixed(2)} km
-            </Text>
-            
-          </View>
-          <View style={styles.healthItem}>
-            <Text style={styles.healthLabel}>Time</Text>
-            <Icon name="time-outline" size={15} />
-            <Text style={styles.healthValue}>
-              {(getChartData().time / 60).toFixed(2)} min
-            </Text>
-            
-          </View>
-          <View style={styles.healthItem}>
-            <Text style={styles.healthLabel}>Calories</Text>
-            <Icon name="flame-outline" size={15} />
-            <Text style={styles.healthValue}>
-              {getChartData().burnedCalories} kcal
-            </Text>
-          </View>
+        <View style={styles.dataContainer}>
+        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
+          <Text style={styles.dataText}>
+            {distanceWalked.toFixed(2)} km
+          </Text>
+          <FoundationIcon name="foot" size={20} color={'green'} />
+          <Text style={{ marginLeft: 5, }}>
+           Distance
+         </Text>
+        </View>
+        
+        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
+          <Text style={styles.dataText}>{timeToWalk.toFixed()} min</Text>
+          <Icon name="time-outline" size={20} color={'green'} />
+          <Text style={{ marginLeft: 5, }}>
+           Time
+         </Text>
+        </View>
+        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
+          <Text style={styles.dataText}>{caloriesBurned.toFixed()} cal</Text>
+          <Icon name="flame-outline" size={20} color={'green'} />
+          <Text style={{ marginLeft: 5, }}>
+           Calories
+         </Text>
+        </View>
+      </View>
         </View>
       </View>
       <View style={styles.bottomContainer}>
@@ -178,10 +216,26 @@ const StepRecordPage = ({ recordName }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#2F8D8F',
     alignItems: 'center',
     paddingTop: 32,
     paddingBottom: 16,
+  },
+  dataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dataRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 25,
+    marginLeft: 18,
+    marginTop: 28,
+  },
+  dataText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 4,
   },
   progressContainer: {
     flex: 0.7,
@@ -191,7 +245,7 @@ const styles = StyleSheet.create({
   recordNameTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#5C77FF',
+    color: '#5C4272',
     marginBottom: 16,
   },
   chartContainer: {

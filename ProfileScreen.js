@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FooterBar from './footerbar';
 import Navbar from './NavBar';
 
@@ -15,7 +16,8 @@ function ProfileScreen() {
             <View style={styles.option}>
               <Text style={styles.optionText}>User ID</Text><Text style={styles.optionText2}>1234</Text>
               <TouchableOpacity>
-                <Text style={styles.copyText}>Copy</Text>
+                {/* <Text style={styles.copyText}>Copy</Text> */}
+                <MaterialIcons name='content-copy' size={20}/>
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.option} onPress={() => navigation.navigate('Invite')}>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import FoundationIcon from 'react-native-vector-icons/Foundation';
 import { Pedometer } from 'expo-sensors';
 import { useNavigation } from '@react-navigation/native';
 
@@ -40,21 +41,21 @@ const TodayHealthDataContainer = () => {
           <Text style={styles.dataText}>
             {distanceWalked.toFixed(2)} km
           </Text>
-          <Icon name="walk-outline" size={15} />
+          <FoundationIcon name="foot" size={20} color={'green'}/>
           <Text style={{ marginLeft: 5, }}>
            Distance
          </Text>
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>{timeToWalk.toFixed()} min</Text>
-          <Icon name="time-outline" size={15} />
+          <Icon name="time-outline" size={20} color={'green'}/>
           <Text style={{ marginLeft: 5, }}>
            Time
          </Text>
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>{caloriesBurned.toFixed()} cal</Text>
-          <Icon name="flame-outline" size={15} />
+          <Icon name="flame-outline" size={20} color={'green'} />
           <Text style={{ marginLeft: 5, }}>
            Calories
          </Text>

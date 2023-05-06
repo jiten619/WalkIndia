@@ -8,7 +8,7 @@ import {
   Share,
   ScrollView,
 } from 'react-native';
-import Clipboard from '@react-native-community/clipboard';
+import Clipboard from '@react-native-clipboard/clipboard';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 
@@ -35,11 +35,12 @@ const InviteScreen = () => {
   return (
     
     
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Navbar/>
+    
+        
     <View style={styles.container}>
       {/* Top invite button */}
-      
+      <Navbar/>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
       <TouchableOpacity style={styles.topButton} onPress={shareApp}>
         <Text style={styles.buttonText}>Invite Friends To Earn More</Text>
       </TouchableOpacity>
@@ -84,22 +85,20 @@ const InviteScreen = () => {
         <Text style={styles.rule}>4. When your Friend install the app from Playstore or Appstore then paste that invite code in its place.</Text>
         <Text style={styles.rule}>4. To getting more coins you'll get to invite more friends.</Text>
       </View>
-      </View>
-     {/* Footerbar */}
+      </ScrollView>
+       {/* Footerbar */}
      <View style={styles.footerbar}>
         {/* Add footerbar content here */}
         <FooterBar/>
     </View>
-    
-    </ScrollView>
-    
+      </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#57F28D',
+    backgroundColor: '#DBDFEA',
   },
   topButton: {
     backgroundColor: '#02B2FE',
@@ -142,8 +141,8 @@ const styles = StyleSheet.create({
   earningsContainer: {
     backgroundColor: '#fff',
     marginBottom: 20,
-    borderWidth: 2,
-    borderColor: 'black',
+    borderWidth: 4,
+    borderColor: '#ACB1D6',
     borderRadius: 15,
     paddingHorizontal: 20,
     paddingVertical: 20,
@@ -163,7 +162,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 20,
+    paddingVertical: 30,
   },
   earningsDetail2: {
     fontSize: 16,
@@ -172,7 +171,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 20,
+    paddingVertical: 30,
   },
   earningsDetail3: {
     fontSize: 16,
@@ -181,23 +180,24 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     borderRadius: 10,
     paddingHorizontal: 8,
-    paddingVertical: 20,
+    paddingVertical: 30,
   },
   earnersContainer: {
     backgroundColor: '#F2F2F2',
+    borderColor: '#ACB1D6',
     paddingHorizontal: 10,
     paddingVertical: 20,
-    borderWidth: 2,
-    borderRadius: 5,
+    borderWidth: 4,
+    borderRadius: 15,
     marginBottom: 20,
     marginLeft: 10,
     marginRight: 10,
   },
   rulesContainer: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E6E6E6',
-    borderRadius: 5,
+    borderWidth: 4,
+    borderColor: '#ACB1D6',
+    borderRadius: 15,
     paddingHorizontal: 10,
     paddingVertical: 15,
     marginBottom: 10,
