@@ -11,6 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
+import AsyncStorage from '@react-native-community/async-storage';
+
 
 const TaskScreen = () => {
   const navigation = useNavigation();
@@ -47,6 +49,12 @@ const TaskScreen = () => {
     { id: 14, steps: 5000, completed: false },
   ]);
 
+  const [coins, setCoins] = useState(0);
+
+  useEffect(() => {
+    getCoins();
+  }, []);
+
   useEffect(() => {
     const intervalId = setInterval(() => {
       checkTaskTimes();
@@ -62,6 +70,15 @@ const TaskScreen = () => {
       const earnedCoins = Math.floor(Math.random() * 5000);
       console.log(earnedCoins);
       setDailyTasks(updatedTasks);
+      try {
+        const oldCoins = parseInt(coins) || 0;
+        const newCoins = oldCoins + earnedCoins;
+        setCoins(newCoins);
+        AsyncStorage.setItem('coins', newCoins.toString()); 
+        console.log(`Stored ${newCoins} coins in AsyncStorage from TaskScreen.`);
+      } catch (error) {
+        console.error('Error storing coins in AsyncStorage:', error);
+      }
     }
   };
 
@@ -73,6 +90,15 @@ const TaskScreen = () => {
       const earnedCoins = Math.floor(Math.random() * 5000);
       console.log(earnedCoins);
       setStepTasks(updatedTasks);
+      try {
+        const oldCoins = parseInt(coins) || 0;
+        const newCoins = oldCoins + earnedCoins;
+        setCoins(newCoins);
+        AsyncStorage.setItem('coins', newCoins.toString()); 
+        console.log(`Stored ${newCoins} coins in AsyncStorage from TaskScreen.`);
+      } catch (error) {
+        console.error('Error storing coins in AsyncStorage:', error);
+      }
     }
   };
 
@@ -89,6 +115,19 @@ const TaskScreen = () => {
       }
     }
     setDailyTasks(updatedTasks);
+  };
+
+  // retrieve coins from AsyncStorage
+  const getCoins = async () => {
+    try {
+      const coins = await AsyncStorage.getItem('coins');
+      if (coins !== null) {
+        console.log(`Retrieved ${coins} coins from AsyncStorage in TaskScreen.`);
+        setCoins(parseInt(coins));
+      }
+    } catch (error) {
+      console.error('Error retrieving coins from AsyncStorage:', error);
+    }
   };
 
   return (

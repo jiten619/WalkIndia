@@ -1,24 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Share,
   ScrollView,
+  Clipboard,
 } from 'react-native';
-import Clipboard from '@react-native-clipboard/clipboard';
+// import  { Clipboard }  from '@react-native-clipboard/clipboard';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 
 
 
 const InviteScreen = () => {
-  const [inviteCode, setInviteCode] = useState("INV1234");
+  const [inviteCode, setInviteCode] = useState("");
   const [invitedFriends, setInvitedFriends] = useState(0);
   const [earnedCoins, setEarnedCoins] = useState(0); // 250 coins per user x 5 invited friends
-   
+
+  const getInviteCode = async () => {
+    try {
+      const response = await fetch('https://your-api.com/user/invite-code', {
+        headers: {
+          'Authorization': 'Bearer ' + token, // replace with your authorization token
+          'Content-Type': 'application/json',
+        },
+        method: 'GET',
+      });
+      const data = await response.json();
+      setInviteCode(data.inviteCode); // set invite code state to the user's invite code
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const inviteFriend = async () => {
+    try {
+      // make API request to invite friend
+      const response = await fetch('https://your-api.com/user/invite', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token, // replace with your authorization token
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          friendEmail: 'friend@example.com', // replace with actual friend's email
+        }),
+      });
+      const data = await response.json();
+      const { coinsEarned, totalInvitedFriends } = data;
+      setInvitedFriends(totalInvitedFriends);
+      setEarnedCoins(coinsEarned);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    getInviteCode(); // retrieve user's invite code when component mounts
+  }, []);
+
   const shareApp = () => {
     Share.share({
       message: 'Download this awesome app by clicking on this link: [add your app store/play store link here]',
@@ -33,65 +75,59 @@ const InviteScreen = () => {
   }
 
   return (
-    
-    
-    
-        
     <View style={styles.container}>
       {/* Top invite button */}
-      <Navbar/>
+      <Navbar />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <TouchableOpacity style={styles.topButton} onPress={shareApp}>
-        <Text style={styles.buttonText}>Invite Friends To Earn More</Text>
-      </TouchableOpacity>
-
-      {/* Invite code */}
-      <View style={styles.inviteCodeContainer}>
-        <Text style={styles.inviteCode}>  invite Code:      {inviteCode}</Text>
-        <TouchableOpacity style={styles.copyButton} onPress={copyInviteCode}>
-          <Text style={{ color: 'white' }}>Copy</Text>
+        <TouchableOpacity style={styles.topButton} onPress={shareApp}>
+          <Text style={styles.buttonText}>Invite Friends To Earn More</Text>
         </TouchableOpacity>
-      </View>
 
-      {/* Invitation earning information */}
-      <Text style={styles.earningsText}>Invitation Earnings:</Text>
-      <View style={styles.earningsContainer}>
-        <View>
-          <Text style={styles.earningsDetail1}>Invite 1-2 friends: 150 coins per user</Text>
-          <Text style={styles.earningsDetail2}>Invite 3-5 friends: 200 coins per user</Text>
-          <Text style={styles.earningsDetail3}>Invite 6-10 friends: 250 coins per user</Text>
+        {/* Invite code */}
+        <View style={styles.inviteCodeContainer}>
+          <Text style={styles.inviteCode}>  invite Code:      {inviteCode}</Text>
+          <TouchableOpacity style={styles.copyButton} onPress={copyInviteCode}>
+            <Text style={{ color: 'white' }}>Copy</Text>
+          </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Earnings summary */}
-      <View style={styles.earnersContainer}>
-        <View style={{ flexDirection: 'row' }}>
-          <Text style={{ marginRight: 10, fontWeight: 'bold' }}>Invited Friends:</Text>
-          <Text style={{ fontWeight: 'bold', marginLeft: 171 }}>{invitedFriends}</Text>
+        {/* Invitation earning information */}
+        <Text style={styles.earningsText}>Invitation Earnings:</Text>
+        <View style={styles.earningsContainer}>
+          <View>
+            <Text style={styles.earningsDetail1}>Invite 1-2 friends: 150 coins per user</Text>
+            <Text style={styles.earningsDetail2}>Invite 3-5 friends: 200 coins per user</Text>
+            <Text style={styles.earningsDetail3}>Invite 6-10 friends: 250 coins per user</Text>
+          </View>
         </View>
-        <View style={{ flexDirection: 'row', marginTop: 5 }}>
-          <Text style={{ marginRight: 10, fontWeight: 'bold' }}>Coins Earned:</Text>
-          <Text style={{ fontWeight: 'bold', marginLeft: 180 }}>{earnedCoins}</Text>
-        </View>
-      </View>
 
-      {/* Random rules */}
-      <Text style={styles.rulesText}>Rules: <Text style={styles.rule}>Rules for How to invite friends.</Text></Text>
-      <View style={styles.rulesContainer}>
-        <Text style={styles.rule}>1. To invite your friend click on the invite button.</Text>
-        <Text style={styles.rule}>2. After that choose the method for how to invite friend.</Text>
-        <Text style={styles.rule}>3. For every successfull invite your are getting coins.</Text>
-        <Text style={styles.rule}>4. You can invite your friend via your invite code.</Text>
-        <Text style={styles.rule}>4. When your Friend install the app from Playstore or Appstore then paste that invite code in its place.</Text>
-        <Text style={styles.rule}>4. To getting more coins you'll get to invite more friends.</Text>
-      </View>
+        {/* Earnings summary */}
+        <View style={styles.earnersContainer}>
+          <View style={{ flexDirection: 'row' }}>
+            <Text style={{ marginRight: 10, fontWeight: 'bold' }}>Invited Friends:</Text>
+            <Text style={{ fontWeight: 'bold', marginLeft: 171 }}>{invitedFriends}</Text>
+          </View>
+          <View style={{ flexDirection: 'row', marginTop: 5 }}>
+            <Text style={{ marginRight: 10, fontWeight: 'bold' }}>Coins Earned:</Text>
+            <Text style={{ fontWeight: 'bold', marginLeft: 180 }}>{earnedCoins}</Text>
+          </View>
+        </View>
+
+        {/* Random rules */}
+        <Text style={styles.rulesText}>Rules: <Text style={styles.rule}>Rules for How to invite friends.</Text></Text>
+        <View style={styles.rulesContainer}>
+          <Text style={styles.rule}>1. To invite your friend click on the invite button.</Text>
+          <Text style={styles.rule}>2. After that choose the method for how to invite friend.</Text>
+          <Text style={styles.rule}>3. For every successfull invite your are getting coins.</Text>
+          <Text style={styles.rule}>4. You can invite your friend via your invite code.</Text>
+          <Text style={styles.rule}>4. When your Friend install the app from Playstore or Appstore then paste that invite code in its place.</Text>
+          <Text style={styles.rule}>4. To getting more coins you'll get to invite more friends.</Text>
+        </View>
       </ScrollView>
-       {/* Footerbar */}
-     <View style={styles.footerbar}>
-        {/* Add footerbar content here */}
-        <FooterBar/>
+
+        <FooterBar />
+      
     </View>
-      </View>
   );
 };
 
@@ -213,16 +249,6 @@ const styles = StyleSheet.create({
   rule: {
     fontSize: 16,
     marginBottom: 5,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    height: 60,
-    paddingHorizontal: 20,
-    borderTopWidth: 2,
-    borderTopColor: '#ccc',
   },
 });
 

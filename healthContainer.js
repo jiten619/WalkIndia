@@ -37,7 +37,7 @@ const TodayHealthDataContainer = () => {
       </View>
 
       <View style={styles.dataContainer}>
-        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
+        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column'}]}>
           <Text style={styles.dataText}>
             {distanceWalked.toFixed(2)} km
           </Text>
@@ -55,7 +55,7 @@ const TodayHealthDataContainer = () => {
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>{caloriesBurned.toFixed()} cal</Text>
-          <Icon name="flame-outline" size={20} color={'green'} />
+          <Icon name="flame-outline" size={20}  color={'green'}/>
           <Text style={{ marginLeft: 5, }}>
            Calories
          </Text>

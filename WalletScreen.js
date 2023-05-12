@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import AsyncStorage from '@react-native-community/async-storage';
 
-
+const bankIcon = require('./assets/bank.png');
+const paypalIcon = require('./assets/paypal.png');
+const googlePayIcon = require('./assets/google-pay.png');
+const phonePayIcon = require('./assets/phone-pe.png');
+const paytmIcon = require('./assets/paytm.png');
 
 const WalletPage = () => {
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
@@ -19,17 +24,23 @@ const WalletPage = () => {
   const [googlePayNumber, setGooglePayNumber] = useState('');
   const [phonePayNumber, setPhonePayNumber] = useState('');
   const [paytmNumber, setPaytmNumber] = useState('');
-  
+
+   // Use async storage to retrieve the coins
+   useEffect(() => {
+    AsyncStorage.getItem('coins')
+      .then(coins => {
+        if (coins) {
+          setWithdrawableCoins(parseInt(coins));
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
 
   const handleWithdraw = () => {
     // Check if the withdraw amount is greater than or equal to 50,000
     if (withdrawAmount >= 50000) {
       // Withdraw the amount and add it to the withdrawal history
-      setWithdrawalHistory(prevState => [...prevState, {
-        amount: withdrawAmount,
-        channel: selectedChannel,
-        date: new Date().toLocaleString(),
-      }]);
+      setWithdrawalHistory(prevState => [...prevState, {amount: withdrawAmount, channel: selectedChannel, date: new Date().toLocaleString()}]);
       // Update the withdrawable coins
       setWithdrawableCoins(prevState => prevState - withdrawAmount);
       // Reset the values
@@ -45,7 +56,7 @@ const WalletPage = () => {
       setPhonePayNumber('');
       setPaytmNumber('');
     }
-  }
+  };
 
   const renderInputFields = () => {
     switch (selectedChannel) {
@@ -131,12 +142,29 @@ const WalletPage = () => {
       default:
         return null;
     }
-  }
+  };
+
+  const renderWithdrawalChannelIcon = (channel) => {
+    switch (channel) {
+      case 'Bank Account':
+        return <Image source={bankIcon} style={styles.channelIcon} />;
+      case 'Paypal Account':
+        return <Image source={paypalIcon} style={styles.channelIcon} />;
+      case 'Google Pay':
+        return <Image source={googlePayIcon} style={styles.channelIcon} />;
+      case 'Phone Pay':
+        return <Image source={phonePayIcon} style={styles.channelIcon} />;
+      case 'Paytm':
+        return <Image source={paytmIcon} style={styles.channelIcon} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollViewContainer}>
       <View style={styles.container}>
-        {/* Show the history and withdrawable coins */}
+        {/* Show the header and withdrawable coins */}
         <View style={styles.headerContainer}>
           <View style={styles.withdrawableCoinsContainer}>
             <Text style={styles.withdrawableCoinsText}>Withdrawable:</Text>
@@ -165,19 +193,24 @@ const WalletPage = () => {
 
         {/* Show the channel selection */}
         <View style={styles.channelContainer}>
-        <Text style={styles.inputLabel}>Select channel</Text>
-          <Picker
-            selectedValue={selectedChannel}
-            onValueChange={channel => setSelectedChannel(channel)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select Withdrawal Channel" value={null} />
-            <Picker.Item label="Bank Account" value="Bank Account" />
-            <Picker.Item label="Paypal Account" value="Paypal Account" />
-            <Picker.Item label="Google Pay" value="Google Pay" />
-            <Picker.Item label="Phone Pay" value="Phone Pay" />
-            <Picker.Item label="Paytm" value="Paytm" />
-          </Picker>
+          <Text style={styles.inputLabel}>Select withdrawal channel</Text>
+          <View style={styles.channelIconsContainer}>
+            <TouchableOpacity onPress={() => setSelectedChannel('Bank Account')}>
+              {renderWithdrawalChannelIcon('Bank Account')}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSelectedChannel('Paypal Account')}>
+              {renderWithdrawalChannelIcon('Paypal Account')}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSelectedChannel('Google Pay')}>
+              {renderWithdrawalChannelIcon('Google Pay')}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSelectedChannel('Phone Pay')}>
+              {renderWithdrawalChannelIcon('Phone Pay')}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setSelectedChannel('Paytm')}>
+              {renderWithdrawalChannelIcon('Paytm')}
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Show channel-specific input fields */}
@@ -189,8 +222,7 @@ const WalletPage = () => {
           disabled={withdrawAmount < 50000 || !selectedChannel}
           style={[
             styles.cashOutButton,
-            withdrawAmount < 50000 ? styles.disabledCashOutButton : {},
-            !selectedChannel ? styles.disabledCashOutButton : {},
+            withdrawAmount < 50000 || !selectedChannel ? styles.disabledCashOutButton : {},
           ]}
         >
           <Text style={styles.cashOutButtonText}>Cash Out</Text>
@@ -212,17 +244,19 @@ const WalletPage = () => {
       </View>
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   scrollViewContainer: {
     flexGrow: 1,
+    backgroundColor: '#F3FCFF',
   },
   container: {
     flex: 1,
     backgroundColor: '#F3FCFF',
     paddingHorizontal: 20,
     paddingTop: 40,
+    paddingBottom: 20,
   },
   headerContainer: {
     flexDirection: 'row',
@@ -266,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     marginTop: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#DDD',
+    borderBottomColor: '#ddd',
   },
   inputPrefix: {
     fontSize: 16,
@@ -293,9 +327,24 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
   },
-  picker: {
+  channelIconsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  channelIcon: {
+    width: 50,
     height: 50,
-    width: '100%',
+    resizeMode: 'contain',
+  },
+  channelInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginTop: 5,
   },
   cashOutButton: {
     backgroundColor: '#19B5FE',
