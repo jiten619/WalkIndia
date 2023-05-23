@@ -13,7 +13,7 @@ const coinImage1 = require('./assets/diamond.png');
 const coinImage2 = require('./assets/coin2.png');
 const coinImage3 = require('./assets/giftbox.png');
 
-const coinAnimationDuration = 2000; // duration of a single animation cycle
+let coinAnimationDuration = 1000; // duration of a single animation cycle
 const coinAnimationDelay = 500; // delay between two animations
 
 const HomeScreen = () => {
@@ -65,6 +65,7 @@ const HomeScreen = () => {
     } catch (error) {
       console.error('Error storing coins in AsyncStorage:', error);
     }
+    return;
   };
 
   const collectReward = async () => {

@@ -4,21 +4,24 @@ import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FooterBar from './footerbar';
 import Navbar from './NavBar';
+import AsyncStorage from '@react-native-community/async-storage';
 
 function ProfileScreen() {
   const navigation = useNavigation();
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
-    // Call an API to retrieve the user ID here and set it using the setUserId function
-    fetch('https://example.com/getUserId')
-      .then(response => response.json())
-      .then(data => {
-        setUserId(data.userId);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+    // Check if a user ID is already stored in AsyncStorage
+    AsyncStorage.getItem('userId').then((storedUserId) => {
+      if (storedUserId != null) {
+        setUserId(storedUserId);
+      } else {
+        // Generate a new random user ID and store it in AsyncStorage
+        const newUserId = Math.floor(Math.random() * 1000000);
+        AsyncStorage.setItem('userId', newUserId.toString());
+        setUserId(newUserId.toString());
+      }
+    });
   }, []);
 
   const handleCopy = () => {

@@ -11,6 +11,7 @@ import {
 // import  { Clipboard }  from '@react-native-clipboard/clipboard';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
+import AsyncStorage from '@react-native-community/async-storage';
 
 
 
@@ -19,21 +20,7 @@ const InviteScreen = () => {
   const [invitedFriends, setInvitedFriends] = useState(0);
   const [earnedCoins, setEarnedCoins] = useState(0); // 250 coins per user x 5 invited friends
 
-  const getInviteCode = async () => {
-    try {
-      const response = await fetch('https://your-api.com/user/invite-code', {
-        headers: {
-          'Authorization': 'Bearer ' + token, // replace with your authorization token
-          'Content-Type': 'application/json',
-        },
-        method: 'GET',
-      });
-      const data = await response.json();
-      setInviteCode(data.inviteCode); // set invite code state to the user's invite code
-    } catch (error) {
-      console.error(error);
-    }
-  };
+ 
 
   const inviteFriend = async () => {
     try {
@@ -57,9 +44,7 @@ const InviteScreen = () => {
     }
   };
 
-  useEffect(() => {
-    getInviteCode(); // retrieve user's invite code when component mounts
-  }, []);
+ 
 
   const shareApp = () => {
     Share.share({
@@ -73,6 +58,20 @@ const InviteScreen = () => {
     Clipboard.setString(inviteCode);
     alert('Invite code copied to clipboard!');
   }
+
+  useEffect(() => {
+    // Check if a user ID is already stored in AsyncStorage
+    AsyncStorage.getItem('inviteCode').then((storedinviteCode) => {
+      if (storedinviteCode != null) {
+        setInviteCode(storedinviteCode);
+      } else {
+        // Generate a new random user ID and store it in AsyncStorage
+        const newInviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        AsyncStorage.setItem('inviteCode', newInviteCode.toString());
+        setInviteCode(newInviteCode.toString());
+      }
+    });
+  }, []);
 
   return (
     <View style={styles.container}>

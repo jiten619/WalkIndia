@@ -14,7 +14,7 @@ const StepRecordPage = ({ recordName }) => {
   const [timeToWalk, setTimeToWalk] = React.useState(0); // time to walk in minutes
   const [caloriesBurned, setCaloriesBurned] = React.useState(0); // calories burned
   const [steps, setSteps] = React.useState(0); // step count
-  const [stepData, setStepData] = React.useState([300,600,1000,380,540,710,940]); // step data for the past week
+  const [stepData, setStepData] = React.useState([300,600,1000,380,540,710,0]); // step data for the past week
 
   useEffect(()=> {
     subscribe();
