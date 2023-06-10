@@ -6,7 +6,6 @@ import Navbar from './NavBar';
 import FooterBar from './footerbar';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import store from './store';
-import AsyncStorage from '@react-native-community/async-storage';
 
 const backgroundImage = { uri: 'https://img.freepik.com/premium-photo/young-man-runner-running-running-road-city-park_41380-381.jpg?w=740' };
 const coinImage1 = require('./assets/diamond.png');
@@ -27,14 +26,26 @@ const HomeScreen = () => {
 
   useEffect(() => {
     subscribe();
-    getCoins();
   }, []);
 
   const subscribe = () => {
     const subscription = Pedometer.watchStepCount((result) => {
-      updateStepCount(result.steps)
-    })
-
+      updateStepCount(result.steps);
+      const today = new Date().toISOString().substring(0, 10);
+      fetch('http://192.168.1.4:3000/steps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ date: today, steps: result.steps })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Steps data:', data);
+      })
+      .catch(error => console.log(error));
+    });
+  
     Pedometer.isAvailableAsync().then(
       (result) => {
         setPedometerAvailability(String(result));
@@ -56,34 +67,49 @@ const HomeScreen = () => {
       setDisappearedCoins(disappearedCoins.filter((i) => i !== index));
     }, 5000);
 
-    // Store the coins in AsyncStorage
     try {
-      const oldCoins = await AsyncStorage.getItem('coins');
-      const newCoins = parseInt(oldCoins || 0) + randomCoins;
-      await AsyncStorage.setItem('coins', newCoins.toString());
-      console.log(`Stored ${newCoins} coins in AsyncStorage.`);
+      const response = await fetch('http://192.168.1.4:3000/coins', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ coins: randomCoins }) 
+      });
+      if (!response.ok) {
+        throw new Error('Error adding coins to the database');
+      }
+      const responseJson = await response.json();
+      console.log('Coins added to the database:', responseJson);
     } catch (error) {
-      console.error('Error storing coins in AsyncStorage:', error);
+      console.error('Error adding coins to the database:', error);
     }
-    return;
   };
 
   const collectReward = async () => {
-    const percentageOfTarget = stepCount / 6500; // Calculate the percentage of the total steps target reached by the user so far
-    const randomCoins = Math.floor(Math.random() * (10000 - 0.1 + 1) + 0.1); // Generate a random number of coins
-    const collectedReward = Math.round(percentageOfTarget * randomCoins); // Calculate the rewards based on the percentage of total steps reached
+    const percentageOfTarget = stepCount / 6500;
+    const randomCoins = Math.floor(Math.random() * (10000 - 0.1 + 1) + 0.1);
+    const collectedReward = Math.round(percentageOfTarget * randomCoins);
     console.log(`Collected ${collectedReward} coins as a reward!`);
+
+    try {
+      const response = await fetch('http://192.168.1.4:3000/coins', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ coins: collectedReward }) 
+      });
+      if (!response.ok) {
+        throw new Error('Error adding coins to the database');
+      }
+      const responseJson = await response.json();
+      console.log('Coins added to the database:', responseJson);
+    } catch (error) {
+      console.error('Error adding coins to the database:', error);
+    }
+    
     store.dispatch({ type: 'ADD_COINS', amount: collectedReward });
 
-    // Store the coins in AsyncStorage
-    try {
-      const oldCoins = await AsyncStorage.getItem('coins');
-      const newCoins = parseInt(oldCoins || 0) + collectedReward;
-      await AsyncStorage.setItem('coins', newCoins.toString());
-      console.log(`Stored ${newCoins} coins in AsyncStorage.`);
-    } catch (error) {
-      console.error('Error storing coins in AsyncStorage:', error);
-    }
   };
 
   const coinsPositions = Array.from({ length: 8 }, (_, index) => {
@@ -117,17 +143,7 @@ const HomeScreen = () => {
     Animated.loop(Animated.stagger(coinAnimationDelay, animations), {iterations: -1}).start();
   }, []);
 
-  const getCoins = async () => {
-    try {
-      const coins = await AsyncStorage.getItem('coins');
-      if (coins !== null) {
-        console.log(`Retrieved ${coins} coins from AsyncStorage in HomeScreen.`);
-        setCoins(parseInt(coins));
-      }
-    } catch (error) {
-      console.error('Error retrieving coins from AsyncStorage:', error);
-    }
-  };
+  
 
   return (
     <View  style={styles.container}>

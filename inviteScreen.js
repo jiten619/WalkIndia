@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ const InviteScreen = () => {
 
  
 
-  const inviteFriend = async () => {
+  const inviteFriend = useCallback(async () => {
     try {
       // make API request to invite friend
       const response = await fetch('https://your-api.com/user/invite', {
@@ -42,7 +42,7 @@ const InviteScreen = () => {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, []);
 
  
 
@@ -55,8 +55,12 @@ const InviteScreen = () => {
   }
 
   const copyInviteCode = () => {
-    Clipboard.setString(inviteCode);
-    alert('Invite code copied to clipboard!');
+    try {
+      Clipboard.setString(inviteCode);
+      alert('Invite code copied to clipboard!');
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   useEffect(() => {
@@ -119,8 +123,8 @@ const InviteScreen = () => {
           <Text style={styles.rule}>2. After that choose the method for how to invite friend.</Text>
           <Text style={styles.rule}>3. For every successfull invite your are getting coins.</Text>
           <Text style={styles.rule}>4. You can invite your friend via your invite code.</Text>
-          <Text style={styles.rule}>4. When your Friend install the app from Playstore or Appstore then paste that invite code in its place.</Text>
-          <Text style={styles.rule}>4. To getting more coins you'll get to invite more friends.</Text>
+          <Text style={styles.rule}>5. When your Friend install the app from Playstore or Appstore then paste that invite code in its place.</Text>
+          <Text style={styles.rule}>6. To getting more coins you'll get to invite more friends.</Text>
         </View>
       </ScrollView>
 

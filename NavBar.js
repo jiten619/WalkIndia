@@ -2,21 +2,26 @@ import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-import AsyncStorage from '@react-native-community/async-storage';
+
 
 const Navbar = () => {
   const navigation = useNavigation();
   const [withdrawableCoins, setWithdrawableCoins] = useState(0);
 
-  // Use async storage to retrieve the coins
   useEffect(() => {
-    AsyncStorage.getItem('coins')
-      .then(coins => {
-        if (coins) {
-          setWithdrawableCoins(parseInt(coins));
-        }
-      })
-      .catch(err => console.log(err));
+    const interval = setInterval(() => {
+      fetch('http://192.168.1.4:3000/coins')
+        .then(response => response.json())
+        .then(data => {
+          const totalCoins = data.reduce((total, item) => total + parseInt(item.coins), 0);
+          setWithdrawableCoins(totalCoins);
+        })
+        .catch(error => console.warn(error));
+    }, 100);
+  
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   return (

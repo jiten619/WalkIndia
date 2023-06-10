@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-import { Pedometer } from 'expo-sensors';
+import { Pedometer, removeSubscription } from 'expo-sensors';
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
@@ -14,56 +14,43 @@ const StepRecordPage = ({ recordName }) => {
   const [timeToWalk, setTimeToWalk] = React.useState(0); // time to walk in minutes
   const [caloriesBurned, setCaloriesBurned] = React.useState(0); // calories burned
   const [steps, setSteps] = React.useState(0); // step count
-  const [stepData, setStepData] = React.useState([300,600,1000,380,540,710,0]); // step data for the past week
+  const [stepData, setStepData] = React.useState([0, 0, 0, 0, 0, 0, 0]); // step data for the past week
 
-  useEffect(()=> {
-    subscribe();
-  }, [])
-
-  subscribe = () => {
+  useEffect(() => {
+    fetchStepData();
     const subscription = Pedometer.watchStepCount((result) => {
       updateStepCount(result.steps)
-    })
-  }
-
-  React.useEffect(() => {
-    // get step data for the past 7 days
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const endDay = new Date();
-    endDay.setHours(23, 59, 59, 999);
-    endDay.setDate(endDay.getDate()-6);
-
-    Pedometer.getStepCountAsync(today, endDay).then(
-      result => {
-        let pastStepData = [];
-        for (let i = 0; i < result.length; i++){
-          pastStepData.push(result[i].steps);
-        }
-        setStepData(pastStepData.reverse()); // reverse the order of pastStepData
-      },
-      error => {
-        console.log("Error getting step data for the past week: " + error);
+    });
+    return () => {
+      Pedometer.removeAllListeners();
+      subscription && subscription.remove();
+    };
+  }, [fetchStepData, subscribeToStepCount]);
+  
+  const fetchStepData = async () => {
+    try {
+      const response = await fetch('http://192.168.1.5:3000/steps'); // replace with your API endpoint
+      const json = await response.json();
+      if (json.stepData) {
+        const reversedData = json.stepData.slice().reverse().map(data => data.steps);
+        setStepData(reversedData);
       }
-    );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    const subscription = Pedometer.watchStepCount(result => {
-      if (result && result.steps !== undefined) {
-        setSteps(result.steps);
-        setDistanceWalked(result.steps * 0.5 / 1000); // assuming 0.5 meters per step
-        setTimeToWalk(result.steps * 0.5 / 80); // assuming 80 steps per minute
-        setCaloriesBurned(result.steps * 0.05); // assuming 0.05 calories burned per step
-      }
-    }, today);
-
-    return () => subscription.remove();
-  }, []);
+  // const subscribeToStepCount = () => {
+  //   const subscription = Pedometer.watchStepCount(result => {
+  //     updateStepCount(result.steps);
+  //   });
+  // };
 
   return (
     <View style={styles.container}>
       <Text style={styles.recordNameTitle}>Step Record</Text>
       <View style={styles.progressContainer}>
-        <CircularProgress 
+        <CircularProgress
           value={stepCount}
           maxValue={6500}
           radius={80}
@@ -88,20 +75,20 @@ const StepRecordPage = ({ recordName }) => {
         height={220}
         yAxisLabel=""
         chartConfig={{
-            backgroundColor: "#2F8D8F",
-            backgroundGradientFrom: "#2F8D8F",
-            backgroundGradientTo: "#2F8D8F",
-            decimalPlaces: 0, // optional, defaults to 2dp
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-                borderRadius: 16
-            },
-            propsForDots: {
-                r: "6",
-                strokeWidth: "2",
-                stroke: "#FDC702"
-            }
+          backgroundColor: "#2F8D8F",
+          backgroundGradientFrom: "#2F8D8F",
+          backgroundGradientTo: "#2F8D8F",
+          decimalPlaces: 0, // optional, defaults to 2dp
+          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          style: {
+            borderRadius: 16
+          },
+          propsForDots: {
+            r: "6",
+            strokeWidth: "2",
+            stroke: "#FDC702"
+          }
         }}
         bezier
         style={styles.chart}

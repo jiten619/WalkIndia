@@ -5,7 +5,6 @@ import FoundationIcon from 'react-native-vector-icons/Foundation';
 import { Pedometer } from 'expo-sensors';
 import { useNavigation } from '@react-navigation/native';
 
-
 const TodayHealthDataContainer = () => {
   const navigation = useNavigation();
   const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
@@ -32,39 +31,40 @@ const TodayHealthDataContainer = () => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Icon name="stats-chart-outline" size={15} color={'lightgreen'} />
+        <Icon name="stats-chart-outline" size={15} color="lightgreen" />
         <Text style={styles.title}>Today's Health data</Text>
       </View>
 
       <View style={styles.dataContainer}>
-        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column'}]}>
+        <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>
             {distanceWalked.toFixed(2)} km
           </Text>
-          <FoundationIcon name="foot" size={20} color={'green'}/>
-          <Text style={{ marginLeft: 5, }}>
-           Distance
-         </Text>
+          <FoundationIcon name="foot" size={20} color="green"/>
+          <Text style={{ marginLeft: 5 }}>
+            Distance
+          </Text>
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>{timeToWalk.toFixed()} min</Text>
-          <Icon name="time-outline" size={20} color={'green'}/>
-          <Text style={{ marginLeft: 5, }}>
-           Time
-         </Text>
+          <Icon name="time-outline" size={20} color="green" />
+          <Text style={{ marginLeft: 5 }}>
+            Time
+          </Text>
         </View>
         <View style={[styles.dataRow, { justifyContent: 'space-between', flexDirection: 'column' }]}>
           <Text style={styles.dataText}>{caloriesBurned.toFixed()} cal</Text>
-          <Icon name="flame-outline" size={20}  color={'green'}/>
-          <Text style={{ marginLeft: 5, }}>
-           Calories
-         </Text>
+          <Icon name="flame-outline" size={20} color="green"/>
+          <Text style={{ marginLeft: 5 }}>
+            Calories
+          </Text>
         </View>
       </View>
+
       <View style={styles.moreContainer}>
         <TouchableOpacity onPress={() => navigation.navigate('StepsRecord')}>
-        <Text style={styles.moreText}>More</Text>
-        <Icon name='caret-forward' size={12} color='#000000' />
+          <Text style={styles.moreText}>More</Text>
+          <Icon name='caret-forward' size={12} color='#000000' />
         </TouchableOpacity> 
       </View>
     </View>
@@ -96,10 +96,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 4,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   dataContainer: {
     flexDirection: 'row',
