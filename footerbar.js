@@ -8,32 +8,23 @@ const FooterBar = () => {
   const navigation = useNavigation();
   return (
     <View style={styles.footer}>
-      <View style={styles.iconContainer}>
-        <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Home')}>
+      <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Home')}>
         <Icon name="home-outline" size={20} color={'#fff'} />
         <Text style={styles.iconLabel}>Home</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.iconContainer}>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Task')}> 
         <Icon name="today-outline" size={20} color={'#fff'} />
         <Text style={styles.iconLabel}>Tasks</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.iconContainer}>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Invite')}>
         <Icon name="person-add-outline" size={20} color={'#fff'} />
         <Text style={styles.iconLabel}>Invite</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.iconContainer}>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Profile')}>
         <Icon name="person-circle-outline" size={20} color={'#fff'} />
         <Text style={styles.iconLabel}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     </View>
-    
   );
 };
 

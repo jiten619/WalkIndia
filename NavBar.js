@@ -2,27 +2,11 @@ import React, {useEffect, useState} from 'react';
 import {StyleSheet, View, Text, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/native';
-
+import { useSelector } from 'react-redux';
 
 const Navbar = () => {
   const navigation = useNavigation();
-  const [withdrawableCoins, setWithdrawableCoins] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetch('http://192.168.1.4:3000/coins')
-        .then(response => response.json())
-        .then(data => {
-          const totalCoins = data.reduce((total, item) => total + parseInt(item.coins), 0);
-          setWithdrawableCoins(totalCoins);
-        })
-        .catch(error => console.warn(error));
-    }, 100);
-  
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
+  const withdrawableCoins = useSelector((state) => state.coins);
 
   return (
     <View style={styles.container}>

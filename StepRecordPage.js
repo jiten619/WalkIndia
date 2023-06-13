@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-import { Pedometer, removeSubscription } from 'expo-sensors';
+import { Pedometer } from 'expo-sensors';
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
@@ -17,34 +17,40 @@ const StepRecordPage = ({ recordName }) => {
   const [stepData, setStepData] = React.useState([0, 0, 0, 0, 0, 0, 0]); // step data for the past week
 
   useEffect(() => {
-    fetchStepData();
+    fetchStepData(); // fetch step data once when the component mounts
     const subscription = Pedometer.watchStepCount((result) => {
-      updateStepCount(result.steps)
+      updateStepCount(result.steps);
+      setSteps(result.steps); // update the step count state
+      setDistanceWalked(result.steps * 0.000762); // calculate distance based on the average stride length of 0.762 meters
+      setTimeToWalk(result.steps * 0.6);
+      setCaloriesBurned(result.steps * 0.05);
     });
     return () => {
-      Pedometer.removeAllListeners();
-      subscription && subscription.remove();
+      subscription && subscription.remove(); // remove the subscription when the component unmounts
     };
-  }, [fetchStepData, subscribeToStepCount]);
-  
-  const fetchStepData = async () => {
-    try {
-      const response = await fetch('http://192.168.1.5:3000/steps'); // replace with your API endpoint
-      const json = await response.json();
-      if (json.stepData) {
-        const reversedData = json.stepData.slice().reverse().map(data => data.steps);
-        setStepData(reversedData);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  }, []);
 
-  // const subscribeToStepCount = () => {
-  //   const subscription = Pedometer.watchStepCount(result => {
-  //     updateStepCount(result.steps);
-  //   });
-  // };
+  const fetchStepData = async () => {
+    const today = new Date();
+    let stepCounts = [];
+    let formattedDate;
+
+    // make an array of promises for each day's API request
+    const promises = [...Array(7)].map((_, i) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      formattedDate = date.toISOString().split('T')[0];
+      return fetch(`http://192.168.1.3:3000/steps?date=${formattedDate}`);
+    });
+
+    // resolve all promises simultaneously
+    const responses = await Promise.all(promises);
+    const jsonResponses = await Promise.all(responses.map(res => res.json()));
+
+    // extract the step data for each day
+    const stepCountsByDay = jsonResponses.map(res => res[formattedDate]?.steps || 0);
+    setStepData(stepCountsByDay);
+  };
 
   return (
     <View style={styles.container}>
@@ -70,7 +76,7 @@ const StepRecordPage = ({ recordName }) => {
         />
       </View>
       <LineChart
-        data={{ labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: stepData }] }}
+        data={{ labels: ['Day 6', 'Day 5', 'Day 4', 'Day 3', 'Day 2', 'Day 1', 'Today'], datasets: [{ data: stepData }] }}
         width={screenWidth - 32} // from react-native
         height={220}
         yAxisLabel=""

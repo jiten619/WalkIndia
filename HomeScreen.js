@@ -7,45 +7,64 @@ import FooterBar from './footerbar';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import store from './store';
 
+import { updateStepCount } from "./reducer";
+
 const backgroundImage = { uri: 'https://img.freepik.com/premium-photo/young-man-runner-running-running-road-city-park_41380-381.jpg?w=740' };
 const coinImage1 = require('./assets/diamond.png');
 const coinImage2 = require('./assets/coin2.png');
 const coinImage3 = require('./assets/giftbox.png');
+const coinsPositions = Array.from({ length: 8 }, (_, index) => {
+  const angle = Math.PI * (index + 1) / 9;
+  const x = 135 * Math.cos(angle);
+  const y = 175 * Math.sin(angle);
+  const imageIndex = index % 3; // choose which image to use based on the index
+  return { left: 140 + x, bottom: y, imageIndex };
+});
 
 let coinAnimationDuration = 1000; // duration of a single animation cycle
 const coinAnimationDelay = 500; // delay between two animations
 
 const HomeScreen = () => {
   const [PedometerAvailability, setPedometerAvailability] = useState('')
-  const [stepCount, updateStepCount] = useState(0);
   const [disappearedCoins, setDisappearedCoins] = useState([]);
   const [animatedValues, setAnimatedValues] = useState(
     Array.from({ length: 8 }, (_, index) => new Animated.Value(0)) // initialize animated values
   );
-  const [coins, setCoins] = useState(0);
+  const { stepCount, coins } = store.getState();
 
   useEffect(() => {
+    store.subscribe(() => {
+      const { stepCount: newStepCount } = store.getState();
+      if (newStepCount !== stepCount) {
+        setDisappearedCoins([])
+      }
+    })
     subscribe();
   }, []);
 
-  const subscribe = () => {
-    const subscription = Pedometer.watchStepCount((result) => {
-      updateStepCount(result.steps);
-      const today = new Date().toISOString().substring(0, 10);
-      fetch('http://192.168.1.4:3000/steps', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ date: today, steps: result.steps })
-      })
-      .then(response => response.json())
-      .then(data => {
+  const dispatchStepCount = (newStepCount) => {
+    store.dispatch(updateStepCount(newStepCount));
+    const today = new Date().toISOString().substring(0, 10);
+    // create a POST request to the server to store today's step count with the "today" query parameter
+    fetch('http://192.168.1.3:3000/steps', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ date: today, steps: newStepCount }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
         console.log('Steps data:', data);
       })
-      .catch(error => console.log(error));
+      .catch((error) => console.log(error));
+  };
+
+  const subscribe = () => {
+    const subscription = Pedometer.watchStepCount((result) => {
+      dispatchStepCount(result.steps);
     });
-  
+
     Pedometer.isAvailableAsync().then(
       (result) => {
         setPedometerAvailability(String(result));
@@ -68,7 +87,7 @@ const HomeScreen = () => {
     }, 5000);
 
     try {
-      const response = await fetch('http://192.168.1.4:3000/coins', {
+      /*const response = await fetch('http://192.168.1.5:3000/coins', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -79,7 +98,7 @@ const HomeScreen = () => {
         throw new Error('Error adding coins to the database');
       }
       const responseJson = await response.json();
-      console.log('Coins added to the database:', responseJson);
+      console.log('Coins added to the database:', responseJson);*/
     } catch (error) {
       console.error('Error adding coins to the database:', error);
     }
@@ -92,7 +111,7 @@ const HomeScreen = () => {
     console.log(`Collected ${collectedReward} coins as a reward!`);
 
     try {
-      const response = await fetch('http://192.168.1.4:3000/coins', {
+      /*const response = await fetch('http://192.168.1.5:3000/coins', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -103,22 +122,14 @@ const HomeScreen = () => {
         throw new Error('Error adding coins to the database');
       }
       const responseJson = await response.json();
-      console.log('Coins added to the database:', responseJson);
+      console.log('Coins added to the database:', responseJson);*/
     } catch (error) {
       console.error('Error adding coins to the database:', error);
     }
-    
+
     store.dispatch({ type: 'ADD_COINS', amount: collectedReward });
 
   };
-
-  const coinsPositions = Array.from({ length: 8 }, (_, index) => {
-    const angle = Math.PI * (index + 1) / 9;
-    const x = 135 * Math.cos(angle);
-    const y = 175 * Math.sin(angle);
-    const imageIndex = index % 3; // choose which image to use based on the index
-    return { left: 140 + x, bottom: y, imageIndex };
-  });
 
   useEffect(() => {
     // create a sequence of up and down animations for each coin
@@ -143,7 +154,7 @@ const HomeScreen = () => {
     Animated.loop(Animated.stagger(coinAnimationDelay, animations), {iterations: -1}).start();
   }, []);
 
-  
+
 
   return (
     <View  style={styles.container}>

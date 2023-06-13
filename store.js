@@ -1,18 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
+import reducer from './reducer';
 
-const initialState = {
-  withdrawableCoins: 0,
-};
-
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case 'ADD_COINS':
-      return { ...state, withdrawableCoins: state.withdrawableCoins + action.amount };
-    default:
-      return state;
-  }
-};
-
-const store = configureStore({ reducer });
+const store = configureStore({
+  reducer: reducer,
+});
 
 export default store;

@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
-import { log } from 'react-native-reanimated';
+import store from './store';
 
 const TaskScreen = () => {
   const navigation = useNavigation();
@@ -48,11 +48,11 @@ const TaskScreen = () => {
     { id: 14, steps: 5000, completed: false },
   ]);
 
-  const [coins, setCoins] = useState(0);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
       checkTaskTimes();
+      checkStepCounts();
     }, 1000);
     return () => clearInterval(intervalId);
   }, []);
@@ -63,36 +63,37 @@ const TaskScreen = () => {
     if (taskIndex !== -1) {
       updatedTasks[taskIndex].completed = true;
       const earnedCoins = Math.floor(Math.random() * 5000);
+      store.dispatch({ type: 'ADD_COINS', amount: earnedCoins });
       console.log(earnedCoins);
       setDailyTasks(updatedTasks);
-      try {
-        const oldCoins = parseInt(coins) || 0;
-        const newCoins = oldCoins + earnedCoins;
-        setCoins(newCoins);
+      // try {
+      //   const oldCoins = parseInt(coins) || 0;
+      //   const newCoins = oldCoins + earnedCoins;
+      //   setCoins(newCoins);
 
-        // send a POST request to add earnedCoins to the database as coins
-        fetch('http://192.168.1.4:3000/coins', {
-          method: 'POST',
-          body: JSON.stringify({
-            coins: earnedCoins,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log(`Stored ${earnedCoins} coins in the database from TaskScreen.`);
-            } else {
-              throw new Error('Error storing coins in the database');
-            }
-          })
-          .catch((error) => {
-            console.error('Error storing coins in the database:', error);
-          });
-      } catch (error) {
-        console.error('Error storing coins in the database:', error);
-      }
+      //   // send a POST request to add earnedCoins to the database as coins
+      //   fetch('http://192.168.1.5:3000/coins', {
+      //     method: 'POST',
+      //     body: JSON.stringify({
+      //       coins: earnedCoins,
+      //     }),
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //   })
+      //     .then((response) => {
+      //       if (response.ok) {
+      //         console.log(`Stored ${earnedCoins} coins in the database from TaskScreen.`);
+      //       } else {
+      //         throw new Error('Error storing coins in the database');
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       console.error('Error storing coins in the database:', error);
+      //     });
+      // } catch (error) {
+      //   console.error('Error storing coins in the database:', error);
+      // }
     }
   };
 
@@ -101,39 +102,39 @@ const TaskScreen = () => {
     let taskIndex = updatedTasks.findIndex((task) => task.id === id);
     if (taskIndex !== -1) {
       updatedTasks[taskIndex].completed = true;
-      console.log(updatedTasks[taskIndex].completed);
-      console.log("running...");
       const earnedCoins = Math.floor(Math.random() * 5000);
+      store.dispatch({ type: 'ADD_COINS', amount: earnedCoins });
       console.log(earnedCoins);
       setStepTasks(updatedTasks);
-      try {
-        const oldCoins = parseInt(coins) || 0;
-        const newCoins = oldCoins + earnedCoins;
-        setCoins(newCoins);
+      // try {
+      //   const oldCoins = parseInt(coins) || 0;
+      //   const newCoins = oldCoins + earnedCoins;
+      //   setCoins(newCoins);
 
-        // send a POST request to add earnedCoins to the database as coins
-        fetch('http://192.168.1.4:3000/coins', {
-          method: 'POST',
-          body: JSON.stringify({
-            coins: earnedCoins,
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-          .then((response) => {
-            if (response.ok) {
-              console.log(`Stored ${earnedCoins} coins in the database from TaskScreen.`);
-            } else {
-              throw new Error('Error storing coins in the database');
-            }
-          })
-          .catch((error) => {
-            console.error('Error storing coins in the database:', error);
-          });
-      } catch (error) {
-        console.error('Error storing coins in the database:', error);
-      }
+      //   // send a POST request to add earnedCoins to the database as coins
+      //   fetch('http://192.168.1.5:3000/coins', {
+      //     method: 'POST',
+      //     body: JSON.stringify({
+      //       coins: earnedCoins,
+      //     }),
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //   })
+      //     .then((response) => {
+      //       if (response.ok) {
+      //         console.log(`Stored ${earnedCoins} coins in the database from TaskScreen.`);
+      //       } else {
+      //         throw new Error('Error storing coins in the database');
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       console.error('Error storing coins in the database:', error);
+      //     });
+      // } catch (error) {
+      //   console.error('Error storing coins in the database:', error);
+      // }
+      checkStepCounts();
     }
   };
 
@@ -150,6 +151,19 @@ const TaskScreen = () => {
       }
     }
     setDailyTasks(updatedTasks);
+  };
+
+  const checkStepCounts = () => {
+    const updatedTasks = [...stepTasks];
+    const stepCount = store.getState().stepCount || 0;
+    for (let i = 0; i < updatedTasks.length; i++) {
+      if (!updatedTasks[i].completed && updatedTasks[i].steps <= stepCount) {
+        updatedTasks[i].expired = true;
+      } else {
+        updatedTasks[i].expired = false;
+      }
+    }
+    setStepTasks(updatedTasks);
   };
 
   return (
@@ -210,34 +224,55 @@ const TaskScreen = () => {
           ))}
         </View>
 
-        {/* Step Tasks */}
-        <Text style={styles.taskHeading}>Step Tasks</Text>
+       {/* Step Tasks */}
+       <Text style={styles.taskHeading}>Step Tasks</Text>
         <View style={styles.taskContainer2}>
-          {stepTasks.map((task) => (
-            <View style={styles.taskCard} key={task.id}>
-              <Text style={styles.task}>Walk {task.steps} steps</Text>
-              {!task.completed ? (
-                <TouchableOpacity
-                  style={styles.rewardButton}
-                  onPress={() => handleStepTaskComplete(task.id)}>
-                  <View style={styles.rewardButtonView}>
-                    <MaterialIcons name="video-library" size={14} color="white" style={styles.rewardButtonIcon} />
-                    <Text style={styles.rewardButtonText}>Receive</Text>
-                  </View>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={styles.taskCompletedButton}>
-                  <Text style={styles.taskCompleted}>Done</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-        </View>
+  {stepTasks.map((task) => (
+    <View
+      style={[
+        styles.taskCard,
+        task.expired ? { backgroundColor: '#fff' } : { backgroundColor: '#fff' },
+      ]}
+      key={task.id}>
+      <View>
+        <Text style={styles.task}>Walk {task.steps} steps</Text>
+      </View>
+      {!task.completed ? (
+         <TouchableOpacity
+           style={[
+             styles.rewardButton,
+             task.expired
+               ? { backgroundColor: '#ff8c00', borderColor: 'black' }
+               : { backgroundColor: 'grey', borderColor: 'grey' },
+           ]}
+           onPress={() => handleStepTaskComplete(task.id)}>
+           <View style={styles.rewardButtonView}>
+             <MaterialIcons name="video-library" size={14} color="white" style={styles.rewardButtonIcon} />
+             <Text
+               style={[
+                 styles.rewardButtonText,
+                 task.completed || task.expired
+                   ? { backgroundColor: '#ff8c00' }
+                   : { backgroundColor: 'grey' },
+               ]}>
+               Receive
+             </Text>
+           </View>
+         </TouchableOpacity>
+       ) : (
+         <TouchableOpacity style={styles.taskCompletedButton}>
+           <Text style={styles.taskCompleted}>Done</Text>
+         </TouchableOpacity>
+       )}
+    </View>
+  ))}
+</View>
       </ScrollView>
       <FooterBar />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

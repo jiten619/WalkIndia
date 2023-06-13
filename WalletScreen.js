@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, Image } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import AsyncStorage from '@react-native-community/async-storage';
+import { useSelector } from 'react-redux';
 
 const bankIcon = require('./assets/bank.png');
 const paypalIcon = require('./assets/paypal.png');
@@ -11,7 +12,7 @@ const paytmIcon = require('./assets/paytm.png');
 
 const WalletPage = () => {
   const [withdrawalHistory, setWithdrawalHistory] = useState([]);
-  const [withdrawableCoins, setWithdrawableCoins] = useState(0);
+  // const [withdrawableCoins, setWithdrawableCoins] = useState(0);
   const [withdrawAmount, setWithdrawAmount] = useState(0);
   const [selectedChannel, setSelectedChannel] = useState(null);
 
@@ -25,16 +26,18 @@ const WalletPage = () => {
   const [phonePayNumber, setPhonePayNumber] = useState('');
   const [paytmNumber, setPaytmNumber] = useState('');
 
-   // Use async storage to retrieve the coins
-   useEffect(() => {
-    AsyncStorage.getItem('coins')
-      .then(coins => {
-        if (coins) {
-          setWithdrawableCoins(parseInt(coins));
-        }
-      })
-      .catch(err => console.log(err));
-  }, []);
+  const withdrawableCoins = useSelector((state) => state.coins);
+
+  //  // Use async storage to retrieve the coins
+  //  useEffect(() => {
+  //   AsyncStorage.getItem('coins')
+  //     .then(coins => {
+  //       if (coins) {
+  //         setWithdrawableCoins(parseInt(coins));
+  //       }
+  //     })
+  //     .catch(err => console.log(err));
+  // }, []);
 
   const handleWithdraw = () => {
     // Check if the withdraw amount is greater than or equal to 50,000
