@@ -11,38 +11,60 @@ import {
 // import  { Clipboard }  from '@react-native-clipboard/clipboard';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
-import AsyncStorage from '@react-native-community/async-storage';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native';
+import { nanoid } from 'nanoid/non-secure';
 
 
 const InviteScreen = () => {
+  const route = useRoute();
   const [inviteCode, setInviteCode] = useState("");
   const [invitedFriends, setInvitedFriends] = useState(0);
   const [earnedCoins, setEarnedCoins] = useState(0); // 250 coins per user x 5 invited friends
 
+
+  useEffect(() => {
+    // Update the values with the passed navigation parameters
+    if (route.params && route.params.invitedFriends && route.params.earnedCoins) {
+      setInvitedFriends(route.params.invitedFriends);
+      setEarnedCoins(route.params.earnedCoins);
+    }
+
+    // Rest of the code...
+  }, [route]);
+
  
 
-  const inviteFriend = useCallback(async () => {
-    try {
-      // make API request to invite friend
-      const response = await fetch('https://your-api.com/user/invite', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + token, // replace with your authorization token
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          friendEmail: 'friend@example.com', // replace with actual friend's email
-        }),
-      });
-      const data = await response.json();
-      const { coinsEarned, totalInvitedFriends } = data;
-      setInvitedFriends(totalInvitedFriends);
-      setEarnedCoins(coinsEarned);
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
+  // const updateInviteStatus = async (inviteCode) => {
+  //   try {
+  //     // Make an API request to verify the invite code and update values
+  //     const response = await fetch('https://your-api.com/invite/verify', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         inviteCode: inviteCode,
+  //       }),
+  //     });
+  
+  //     if (response.ok) {
+  //       // If the API request is successful, update the values in the state
+  //       const data = await response.json();
+  //       const { invitedFriends, earnedCoins } = data;
+  //       setInvitedFriends(invitedFriends);
+  //       setEarnedCoins(earnedCoins);
+  //       alert('Invite code verified successfully!');
+  //     } else {
+  //       // If the API request fails, handle the error
+  //       throw new Error('Failed to verify invite code');
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert('Error verifying invite code. Please try again.');
+  //   }
+  // };
+  
 
  
 
@@ -63,20 +85,46 @@ const InviteScreen = () => {
     }
   }
 
+  const generateInviteCode = () => {
+    const newInviteCode = nanoid(6).toUpperCase();
+  
+    // Send a fetch request to store the invite code in the database
+    fetch('http://192.168.1.5:3000/inviteCode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ inviteCode: newInviteCode }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response if needed
+        console.log('Invite code stored in the database:', data);
+      })
+      .catch((error) => {
+        // Handle any errors that occurred during the fetch request
+        console.error('Error storing invite code:', error);
+      });
+  
+    // AsyncStorage.setItem('inviteCode', newInviteCode); // Store invite code in AsyncStorage
+  };
   useEffect(() => {
-    // Check if a user ID is already stored in AsyncStorage
-    AsyncStorage.getItem('inviteCode').then((storedinviteCode) => {
-      if (storedinviteCode != null) {
-        setInviteCode(storedinviteCode);
-      } else {
-        // Generate a new random user ID and store it in AsyncStorage
-        const newInviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        AsyncStorage.setItem('inviteCode', newInviteCode.toString());
-        setInviteCode(newInviteCode.toString());
-      }
-    });
+    fetch('http://192.168.1.5:3000/inviteCode')
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data);
+        if (data.length > 0 && data[0].inviteCode) {
+          setInviteCode(data[0].inviteCode);
+        } else {
+          generateInviteCode();
+        }
+      })
+      .catch((error) => {
+        console.error('Error retrieving invite code:', error);
+      });
   }, []);
-
+  
+  
   return (
     <View style={styles.container}>
       {/* Top invite button */}
@@ -98,9 +146,9 @@ const InviteScreen = () => {
         <Text style={styles.earningsText}>Invitation Earnings:</Text>
         <View style={styles.earningsContainer}>
           <View>
-            <Text style={styles.earningsDetail1}>Invite 1-2 friends: 150 coins per user</Text>
-            <Text style={styles.earningsDetail2}>Invite 3-5 friends: 200 coins per user</Text>
-            <Text style={styles.earningsDetail3}>Invite 6-10 friends: 250 coins per user</Text>
+            <Text style={styles.earningsDetail1}> 1-5 friends: 150 coins per user</Text>
+            <Text style={styles.earningsDetail2}> 6-10 friends: 200 coins per user</Text>
+            <Text style={styles.earningsDetail3}> 11-15 friends: 250 coins per user</Text>
           </View>
         </View>
 

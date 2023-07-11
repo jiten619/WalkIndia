@@ -4,24 +4,50 @@ import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FooterBar from './footerbar';
 import Navbar from './NavBar';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { nanoid } from 'nanoid/non-secure';
 
 function ProfileScreen() {
   const navigation = useNavigation();
   const [userId, setUserId] = useState('');
 
+  const generateUserId = () => {
+    const newUserId = nanoid(10);
+  
+    // Send a fetch request to store the invite code in the database
+    fetch('http://192.168.1.5:3000/userId', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId: newUserId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle the response if needed
+        console.log('User Id stored in the database:', data);
+      })
+      .catch((error) => {
+        // Handle any errors that occurred during the fetch request
+        console.error('Error storing User Id:', error);
+      });
+  
+    // AsyncStorage.setItem('inviteCode', newInviteCode); // Store invite code in AsyncStorage
+  };
   useEffect(() => {
-    // Check if a user ID is already stored in AsyncStorage
-    AsyncStorage.getItem('userId').then((storedUserId) => {
-      if (storedUserId != null) {
-        setUserId(storedUserId);
-      } else {
-        // Generate a new random user ID and store it in AsyncStorage
-        const newUserId = Math.floor(Math.random() * 1000000);
-        AsyncStorage.setItem('userId', newUserId.toString());
-        setUserId(newUserId.toString());
-      }
-    });
+    fetch('http://192.168.1.5:3000/userId')
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(data);
+        if (data.length > 0 && data[0].userId) {
+          setUserId(data[0].userId);
+        } else {
+          generateUserId();
+        }
+      })
+      .catch((error) => {
+        console.error('Error retrieving user id:', error);
+      });
   }, []);
 
   const handleCopy = () => {

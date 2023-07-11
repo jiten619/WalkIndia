@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-import { Pedometer } from 'expo-sensors';
+import { Accelerometer } from 'expo-sensors';
 import { useNavigation } from '@react-navigation/native';
 
 const TodayHealthDataContainer = () => {
@@ -13,17 +13,18 @@ const TodayHealthDataContainer = () => {
   const [steps, setSteps] = React.useState(0); // step count
 
   React.useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const subscription = Pedometer.watchStepCount(result => {
-      if (result && result.steps !== undefined) {
-        setSteps(result.steps);
-        setDistanceWalked(result.steps * 0.5 / 1000); // assuming 0.5 meters per step
-        setTimeToWalk(result.steps * 0.5 / 80); // assuming 80 steps per minute
-        setCaloriesBurned(result.steps * 0.05); // assuming 0.05 calories burned per step
+    const subscription = Accelerometer.addListener(({ x, y, z }) => {
+      const acceleration = Math.sqrt(x * x + y * y + z * z);
+      
+      // Assuming a step occurs when acceleration exceeds a threshold
+      const accelerationThreshold = 0.0005;
+      if (acceleration >= accelerationThreshold) {
+        setSteps(prevSteps => prevSteps + 1);
+        setDistanceWalked(prevDistance => prevDistance + 0.5 / 1000); // assuming 0.5 meters per step
+        setTimeToWalk(prevTime => prevTime + 0.5 / 80); // assuming 80 steps per minute
+        setCaloriesBurned(prevCalories => prevCalories + 0.05); // assuming 0.05 calories burned per step
       }
-    }, today);
+    });
 
     return () => subscription.remove();
   }, []);

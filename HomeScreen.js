@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image, ImageBackground, Animated } from 'react-native';
-import { Pedometer } from 'expo-sensors';
+import { StyleSheet, View, Text, TouchableOpacity, Image, ImageBackground, Animated, Dimensions } from 'react-native';
+import { Accelerometer } from 'expo-sensors';
 import TodayHealthDataContainer from './healthContainer';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import store from './store';
-
 import { updateStepCount } from "./reducer";
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const backgroundImage = { uri: 'https://img.freepik.com/premium-photo/young-man-runner-running-running-road-city-park_41380-381.jpg?w=740' };
 const coinImage1 = require('./assets/diamond.png');
@@ -25,56 +27,155 @@ let coinAnimationDuration = 1000; // duration of a single animation cycle
 const coinAnimationDelay = 500; // delay between two animations
 
 const HomeScreen = () => {
-  const [PedometerAvailability, setPedometerAvailability] = useState('')
+  const [accelerometerAvailability, setAccelerometerAvailability] = useState('');
+  const [lastStepTime, setLastStepTime] = useState(null);
+  const [accelerationThreshold, setAccelerationThreshold] = useState(0.0005);
+  const [lastAcceleration, setLastAcceleration] = useState(0);
   const [disappearedCoins, setDisappearedCoins] = useState([]);
-  const [animatedValues, setAnimatedValues] = useState(
-    Array.from({ length: 8 }, (_, index) => new Animated.Value(0)) // initialize animated values
-  );
+  const animatedValues = Array.from({ length: 8 }, () => new Animated.Value(0)); // initialize animated values
   const { stepCount, coins } = store.getState();
 
   useEffect(() => {
     store.subscribe(() => {
       const { stepCount: newStepCount } = store.getState();
       if (newStepCount !== stepCount) {
-        setDisappearedCoins([])
+        setDisappearedCoins([]);
       }
-    })
-    subscribe();
+    });
+    subscribeAccelerometer();
   }, []);
+  
 
+  const subscribeAccelerometer = () => {
+    Accelerometer.setUpdateInterval(5000); // Set the update interval for accelerometer data
+  
+    // Constants
+    // const accelerationThreshold = 1.5; // Adjust the acceleration threshold as needed
+    const peakDetectionWindow = 100; // Adjust the peak detection window as needed
+    const peakThreshold = 1.0; // Adjust the peak threshold as needed
+    const peakCooldown = 200; // Adjust the peak cooldown period as needed
+  
+    // Variables
+    let accelerationData = []; // Store recent acceleration values for peak detection
+    let lastStepTime = Date.now(); // Store the timestamp of the last step
+    let stepCount = 0; // Store the step count
+    let isWalking = false; // Store the walking state
+    let lastPeakIndex = -1; // Store the index of the last detected peak
+  
+    // Step detection logic
+    const detectSteps = () => {
+      const now = Date.now();
+      const timeDiff = now - lastStepTime;
+  
+      // Perform peak detection within the specified window
+      const peaks = detectPeaks(accelerationData, peakThreshold);
+      // console.log(peaks);
+  
+      if (peaks.length > 0 && timeDiff > peakCooldown) {
+        // Count only unique peaks
+        const uniquePeaks = peaks.filter((peak) => peak.startIndex > lastPeakIndex);
+        lastPeakIndex = peaks.length > 0 ? peaks[peaks.length - 1].startIndex : -1;
+  
+        // Increment the step count and update the last step time
+        stepCount += uniquePeaks.length;
+        lastStepTime = now;
+        dispatchStepCount(stepCount);
+      }
+    };
+  
+    // Peak detection logic
+    const detectPeaks = (data, threshold) => {
+      const peaks = [];
+      let isPeak = false;
+      let peakStartIndex = 0;
+  
+      for (let i = 1; i < data.length - 1; i++) {
+        const prevAcceleration = data[i - 1];
+        const currentAcceleration = data[i];
+        const nextAcceleration = data[i + 1];
+  
+        if (currentAcceleration > prevAcceleration && currentAcceleration > nextAcceleration) {
+          // Potential peak found
+          if (currentAcceleration > threshold) {
+            // Check if it is a valid peak
+            if (!isPeak) {
+              peakStartIndex = i;
+              isPeak = true;
+            }
+          }
+        } else if (isPeak && currentAcceleration < threshold) {
+          // Peak ended
+          const peakValue = Math.max(...data.slice(peakStartIndex, i + 1));
+          peaks.push({ value: peakValue, startIndex: peakStartIndex });
+          isPeak = false;
+        }
+      }
+  
+      return peaks;
+    };
+  
+    // Accelerometer data listener
+    Accelerometer.addListener(({ x, y, z }) => {
+      const acceleration = Math.sqrt(x * x + y * y + z * z);
+  
+      if (isWalking) {
+        if (acceleration < accelerationThreshold) {
+          // User has stopped walking
+          isWalking = false;
+        } else {
+          // Store acceleration data for peak detection
+          accelerationData.push(acceleration);
+  
+          if (accelerationData.length > peakDetectionWindow) {
+            // Remove oldest acceleration data
+            accelerationData.shift();
+          }
+  
+          detectSteps();
+        }
+      } else {
+        if (acceleration >= accelerationThreshold) {
+          // User has started walking
+          isWalking = true;
+          accelerationData = [acceleration]; // Clear previous data and start with new data point
+        }
+      }
+    });
+  
+    // Check if the accelerometer is available
+    Accelerometer.isAvailableAsync().then(
+      (result) => {
+        setAccelerometerAvailability(String(result));
+        console.log('Accelerometer is available');
+      },
+      (error) => {
+        setAccelerometerAvailability(error);
+        console.error('Accelerometer is unavailable:', error);
+      }
+    );
+  };
+  
   const dispatchStepCount = (newStepCount) => {
     store.dispatch(updateStepCount(newStepCount));
     const today = new Date().toISOString().substring(0, 10);
     // create a POST request to the server to store today's step count with the "today" query parameter
-    fetch('http://192.168.1.3:3000/steps', {
+    fetch('http://192.168.1.5:3000/steps', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ date: today, steps: newStepCount }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to update step count on the server');
+        }
+        return response.json();
+      })
       .then((data) => {
         console.log('Steps data:', data);
       })
-      .catch((error) => console.log(error));
-  };
-
-  const subscribe = () => {
-    const subscription = Pedometer.watchStepCount((result) => {
-      dispatchStepCount(result.steps);
-    });
-
-    Pedometer.isAvailableAsync().then(
-      (result) => {
-        setPedometerAvailability(String(result));
-        console.log('Pedometer is available');
-      } ,
-      (error) => {
-        setPedometerAvailability(error);
-        console.error('Pedometer is unavailable:', error);
-      }
-    );
+      .catch((error) => console.error(error));
   };
 
   const onCoinPress = async (index) => {
@@ -86,22 +187,22 @@ const HomeScreen = () => {
       setDisappearedCoins(disappearedCoins.filter((i) => i !== index));
     }, 5000);
 
-    try {
-      /*const response = await fetch('http://192.168.1.5:3000/coins', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ coins: randomCoins }) 
-      });
-      if (!response.ok) {
-        throw new Error('Error adding coins to the database');
-      }
-      const responseJson = await response.json();
-      console.log('Coins added to the database:', responseJson);*/
-    } catch (error) {
-      console.error('Error adding coins to the database:', error);
-    }
+    // try {
+    //   const response = await fetch('http://192.168.1.5:3000/coins', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({ coins: randomCoins })
+    //   });
+    //   if (!response.ok) {
+    //     throw new Error('Failed to add coins to the server');
+    //   }
+    //   const responseJson = await response.json();
+    //   console.log('Coins added to the server:', responseJson);
+    // } catch (error) {
+    //   console.error('Failed to add coins to the server:', error);
+    // }
   };
 
   const collectReward = async () => {
@@ -110,25 +211,24 @@ const HomeScreen = () => {
     const collectedReward = Math.round(percentageOfTarget * randomCoins);
     console.log(`Collected ${collectedReward} coins as a reward!`);
 
-    try {
-      /*const response = await fetch('http://192.168.1.5:3000/coins', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ coins: collectedReward }) 
-      });
-      if (!response.ok) {
-        throw new Error('Error adding coins to the database');
-      }
-      const responseJson = await response.json();
-      console.log('Coins added to the database:', responseJson);*/
-    } catch (error) {
-      console.error('Error adding coins to the database:', error);
-    }
+    // try {
+    //   const response = await fetch('http://192.168.1.5:3000/coins', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify({ coins: collectedReward })
+    //   });
+    //   if (!response.ok) {
+    //     throw new Error('Failed to add coins to the server');
+    //   }
+    //   const responseJson = await response.json();
+    //   console.log('Coins added to the server:', responseJson);
+    // } catch (error) {
+    //   console.error('Failed to add coins to the server:', error);
+    // }
 
     store.dispatch({ type: 'ADD_COINS', amount: collectedReward });
-
   };
 
   useEffect(() => {
@@ -151,14 +251,12 @@ const HomeScreen = () => {
       return Animated.sequence([animation1, animation2]);
     });
     // start the animations in a loop
-    Animated.loop(Animated.stagger(coinAnimationDelay, animations), {iterations: -1}).start();
-  }, []);
-
-
+    Animated.loop(Animated.stagger(coinAnimationDelay, animations), { iterations: -1 }).start();
+  }, [animatedValues, coinsPositions]);
 
   return (
-    <View  style={styles.container}>
-      <ImageBackground source={backgroundImage} style={styles.backgroundImage} >
+    <View style={styles.container}>
+      <ImageBackground source={backgroundImage} style={styles.backgroundImage}>
         <Navbar />
         <View style={styles.progressContainer}>
           <CircularProgress
@@ -182,7 +280,8 @@ const HomeScreen = () => {
 
           <View style={styles.coinContainer}>
             {coinsPositions.map((coinPosition, index) => {
-              if (disappearedCoins.includes(index)) { // if the coin has disappeared, don't render it
+              if (disappearedCoins.includes(index)) {
+                // if the coin has disappeared, don't render it
                 return null;
               }
               return (
@@ -190,30 +289,26 @@ const HomeScreen = () => {
                   key={index}
                   style={[styles.coin, coinPosition, { transform: [{ translateY: animatedValues[index] }] }]}
                 >
-                  <TouchableOpacity
-                    style={styles.bubble}
-                    onPress={() => onCoinPress(index)}
-                  >
-                    <Image source={[coinImage1, coinImage2, coinImage3][coinPosition.imageIndex]} style={{ width: '100%', height: '100%' }} />
+                  <TouchableOpacity style={styles.bubble} onPress={() => onCoinPress(index)}>
+                    <Image
+                      source={[coinImage1, coinImage2, coinImage3][coinPosition.imageIndex]}
+                      style={{ width: '100%', height: '100%' }}
+                    />
                   </TouchableOpacity>
                 </Animated.View>
               );
             })}
           </View>
-
         </View>
 
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-          <TouchableOpacity
-            style={styles.rewardButton}
-            onPress={collectReward}
-          >
+          <TouchableOpacity style={styles.rewardButton} onPress={collectReward}>
             <Text style={styles.rewardButtonText}>Claim Coins</Text>
           </TouchableOpacity>
         </View>
 
         <TodayHealthDataContainer />
-        <FooterBar/>
+        <FooterBar />
       </ImageBackground>
     </View>
   );

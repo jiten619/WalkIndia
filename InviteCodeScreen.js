@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { SafeAreaView, View, TextInput, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import HomeScreen from './HomeScreen';
 
 const InviteCodeScreen = () => {
+  const navigation = useNavigation();
   const [inviteCode, setInviteCode] = useState('');
 
   // Function to handle submit button press
   const handleSubmit = async () => {
-    // Call API to verify invite code
-    // If invite code is valid, navigate to next screen
-    // Otherwise, show error message to user
     try {
-      const response = await fetch('https://your-api.com/verify-invite-code', {
+      const response = await fetch('http://192.168.1.5:3000/inviteCode', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,11 +21,16 @@ const InviteCodeScreen = () => {
       });
   
       const result = await response.json();
+      console.log('result:', result);
   
       if (result.isValid) {
         // Navigate to the next screen
         // You can use any navigation library of your choice here
-        <HomeScreen/>
+        alert('You have successfully verified the invite code.');
+        navigation.navigate('Home', {
+          invitedFriends: result.invitedFriends,
+          earnedCoins: result.earnedCoins,
+        }); // Assuming you have a navigation prop available
       } else {
         // Show error message to user
         alert('Invalid invite code. Please check and try again.');
@@ -36,6 +40,7 @@ const InviteCodeScreen = () => {
       console.error(error);
     }
   };
+  
 
   return (
     <SafeAreaView style={styles.container}>

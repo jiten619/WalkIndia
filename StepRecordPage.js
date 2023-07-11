@@ -3,54 +3,67 @@ import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-import { Pedometer } from 'expo-sensors';
+import { Accelerometer } from 'expo-sensors';
+import store from './store';
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
 
 const StepRecordPage = ({ recordName }) => {
-  const [stepCount, updateStepCount] = useState(0);
+  // const [stepCount, updateStepCount] = useState(0);
   const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
   const [timeToWalk, setTimeToWalk] = React.useState(0); // time to walk in minutes
   const [caloriesBurned, setCaloriesBurned] = React.useState(0); // calories burned
   const [steps, setSteps] = React.useState(0); // step count
   const [stepData, setStepData] = React.useState([0, 0, 0, 0, 0, 0, 0]); // step data for the past week
+  const { stepCount, coins } = store.getState();
 
-  useEffect(() => {
-    fetchStepData(); // fetch step data once when the component mounts
-    const subscription = Pedometer.watchStepCount((result) => {
-      updateStepCount(result.steps);
-      setSteps(result.steps); // update the step count state
-      setDistanceWalked(result.steps * 0.000762); // calculate distance based on the average stride length of 0.762 meters
-      setTimeToWalk(result.steps * 0.6);
-      setCaloriesBurned(result.steps * 0.05);
+  React.useEffect(() => {
+    fetchStepData();
+    const subscription = Accelerometer.addListener(({ x, y, z }) => {
+      const acceleration = Math.sqrt(x * x + y * y + z * z);
+      
+      // Assuming a step occurs when acceleration exceeds a threshold
+      const accelerationThreshold = 0.0005;
+      if (acceleration >= accelerationThreshold) {
+        setSteps(prevSteps => prevSteps + 1);
+        setDistanceWalked(prevDistance => prevDistance + 0.5 / 1000); // assuming 0.5 meters per step
+        setTimeToWalk(prevTime => prevTime + 0.5 / 80); // assuming 80 steps per minute
+        setCaloriesBurned(prevCalories => prevCalories + 0.05); // assuming 0.05 calories burned per step
+      }
     });
-    return () => {
-      subscription && subscription.remove(); // remove the subscription when the component unmounts
-    };
+
+    return () => subscription.remove();
   }, []);
 
   const fetchStepData = async () => {
     const today = new Date();
-    let stepCounts = [];
     let formattedDate;
-
-    // make an array of promises for each day's API request
+  
+    // make an array of promises for each day's API request 
     const promises = [...Array(7)].map((_, i) => {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       formattedDate = date.toISOString().split('T')[0];
-      return fetch(`http://192.168.1.3:3000/steps?date=${formattedDate}`);
+      return fetch(`http://192.168.1.5:3000/steps?date=${formattedDate}`);
     });
-
+  
     // resolve all promises simultaneously
     const responses = await Promise.all(promises);
     const jsonResponses = await Promise.all(responses.map(res => res.json()));
-
-    // extract the step data for each day
-    const stepCountsByDay = jsonResponses.map(res => res[formattedDate]?.steps || 0);
+  
+    // extract the step data for the last 7 days
+    const stepCountsByDay = jsonResponses.slice(-7).map((res, index) => {
+      return [ Object.values(res)[index] || 0];
+    });
+    console.log(stepCountsByDay);
     setStepData(stepCountsByDay);
   };
+  
+  
+
+  
+
 
   return (
     <View style={styles.container}>
@@ -76,7 +89,7 @@ const StepRecordPage = ({ recordName }) => {
         />
       </View>
       <LineChart
-        data={{ labels: ['Day 6', 'Day 5', 'Day 4', 'Day 3', 'Day 2', 'Day 1', 'Today'], datasets: [{ data: stepData }] }}
+        data={{ labels: ['Day 6', 'Day 5', 'Day 4', 'Day 3', 'Day 2', 'Day 1', 'Today'], datasets: [{ data: stepData, labels: 'Step Count' }] }}
         width={screenWidth - 32} // from react-native
         height={220}
         yAxisLabel=""
@@ -158,7 +171,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   progressContainer: {
-    flex: 0.7,
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -166,7 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#5C4272',
-    marginBottom: 16,
+    marginBottom: 5,
   },
   chartContainer: {
     alignSelf: 'stretch',
