@@ -5,7 +5,7 @@ import TodayHealthDataContainer from './healthContainer';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
 import CircularProgress from 'react-native-circular-progress-indicator';
-import store from './store';
+import { store } from './store';
 import { updateStepCount } from "./reducer";
 
 const windowWidth = Dimensions.get('window').width;
@@ -66,6 +66,7 @@ const HomeScreen = () => {
     const detectSteps = () => {
       const now = Date.now();
       const timeDiff = now - lastStepTime;
+      // console.log(timeDiff);
   
       // Perform peak detection within the specified window
       const peaks = detectPeaks(accelerationData, peakThreshold);
@@ -75,6 +76,7 @@ const HomeScreen = () => {
         // Count only unique peaks
         const uniquePeaks = peaks.filter((peak) => peak.startIndex > lastPeakIndex);
         lastPeakIndex = peaks.length > 0 ? peaks[peaks.length - 1].startIndex : -1;
+        // console.log(uniquePeaks);
   
         // Increment the step count and update the last step time
         stepCount += uniquePeaks.length;
@@ -117,6 +119,7 @@ const HomeScreen = () => {
     // Accelerometer data listener
     Accelerometer.addListener(({ x, y, z }) => {
       const acceleration = Math.sqrt(x * x + y * y + z * z);
+      // console.log(acceleration);
   
       if (isWalking) {
         if (acceleration < accelerationThreshold) {
@@ -159,7 +162,7 @@ const HomeScreen = () => {
     store.dispatch(updateStepCount(newStepCount));
     const today = new Date().toISOString().substring(0, 10);
     // create a POST request to the server to store today's step count with the "today" query parameter
-    fetch('http://192.168.1.5:3000/steps', {
+    fetch('https://steadily-lucky-burro.ngrok-free.app/steps', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

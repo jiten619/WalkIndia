@@ -70,8 +70,8 @@ const InviteScreen = () => {
 
   const shareApp = () => {
     Share.share({
-      message: 'Download this awesome app by clicking on this link: [add your app store/play store link here]',
-      url: '[add your app store/play store link here]',
+      message: 'Download this awesome app by clicking on this link: https://expo.dev/artifacts/eas/p4e1ua7hNfm3XtpZKcs9qe.apk',
+      url: 'https://expo.dev/artifacts/eas/p4e1ua7hNfm3XtpZKcs9qe.apk',
       title: 'Invite your friends to use this app!',
     });
   }
@@ -89,7 +89,7 @@ const InviteScreen = () => {
     const newInviteCode = nanoid(6).toUpperCase();
   
     // Send a fetch request to store the invite code in the database
-    fetch('http://192.168.1.5:3000/inviteCode', {
+    fetch('https://steadily-lucky-burro.ngrok-free.app/inviteCode', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ const InviteScreen = () => {
     // AsyncStorage.setItem('inviteCode', newInviteCode); // Store invite code in AsyncStorage
   };
   useEffect(() => {
-    fetch('http://192.168.1.5:3000/inviteCode')
+    fetch('https://steadily-lucky-burro.ngrok-free.app/inviteCode')
       .then((response) => response.json())
       .then((data) => {
         // console.log(data);

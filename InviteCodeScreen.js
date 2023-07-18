@@ -10,7 +10,7 @@ const InviteCodeScreen = () => {
   // Function to handle submit button press
   const handleSubmit = async () => {
     try {
-      const response = await fetch('http://192.168.1.5:3000/inviteCode', {
+      const response = await fetch('https://steadily-lucky-burro.ngrok-free.app/inviteCode', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

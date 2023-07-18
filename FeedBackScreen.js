@@ -53,7 +53,7 @@ const FeedbackScreen = () => {
         });
       });
 
-    fetch('http://192.168.1.5:3000/submit-feedback', {
+    fetch('https://steadily-lucky-burro.ngrok-free.app/submit-feedback', {
       method: 'POST',
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -100,7 +100,7 @@ const FeedbackScreen = () => {
             onChangeText={setEmail}
           />
         </View>
-        <Text style={styles.label}>3. Attach a picture or multiple pictures:</Text>
+        <Text style={styles.label}>4. Attach a picture or multiple pictures:</Text>
         <View style={styles.imageContainer}>
           <TouchableOpacity style={styles.imageButton} onPress={handleChooseImages}>
             <Text style={styles.imageText}>Choose Image(s)</Text>

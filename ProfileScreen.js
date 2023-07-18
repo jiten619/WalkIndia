@@ -15,7 +15,7 @@ function ProfileScreen() {
     const newUserId = nanoid(10);
   
     // Send a fetch request to store the invite code in the database
-    fetch('http://192.168.1.5:3000/userId', {
+    fetch('https://steadily-lucky-burro.ngrok-free.app/userId', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ function ProfileScreen() {
     // AsyncStorage.setItem('inviteCode', newInviteCode); // Store invite code in AsyncStorage
   };
   useEffect(() => {
-    fetch('http://192.168.1.5:3000/userId')
+    fetch('https://steadily-lucky-burro.ngrok-free.app/userId')
       .then((response) => response.json())
       .then((data) => {
         // console.log(data);

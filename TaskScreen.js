@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import moment from 'moment';
 import Navbar from './NavBar';
 import FooterBar from './footerbar';
-import store from './store';
+import { store } from './store';
 
 const TaskScreen = () => {
   const navigation = useNavigation();

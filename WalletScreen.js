@@ -40,11 +40,11 @@ const WalletPage = () => {
 
   const handleWithdraw = () => {
     // Check if the withdraw amount is greater than or equal to 50,000
-    if (withdrawAmount >= 50000) {
+    if (withdrawAmount >= 5000000) {
       // Withdraw the amount and add it to the withdrawal history
       setWithdrawalHistory(prevState => [...prevState, {amount: withdrawAmount, channel: selectedChannel, date: new Date().toLocaleString()}]);
       // Update the withdrawable coins
-      setWithdrawableCoins(prevState => prevState - withdrawAmount);
+      withdrawableCoins(prevState => prevState - withdrawAmount);
       // Reset the values
       setWithdrawAmount(0);
       setSelectedChannel(null);
@@ -172,9 +172,9 @@ const WalletPage = () => {
             <Text style={styles.withdrawableCoinsText}>Withdrawable:</Text>
             <Text style={styles.withdrawableCoinsAmount}>{withdrawableCoins}</Text>
           </View>
-          <TouchableOpacity onPress={() => console.log(withdrawalHistory)}>
+          {/* <TouchableOpacity onPress={() => console.log(withdrawalHistory)}>
             <Text style={styles.withdrawalHistoryButton}>History</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Show the withdraw input */}
@@ -190,7 +190,8 @@ const WalletPage = () => {
               style={styles.inputAmount}
             />
           </View>
-          <Text style={styles.inputSubText}>Minimum withdraw limit is 50,000 coins</Text>
+          <Text style={styles.inputSubText}>Minimum withdraw limit is 50,00,000 coins</Text>
+          <Text style={styles.inputSubText}>50,00,000 coins = 7500 Rupees</Text>
         </View>
 
         {/* Show the channel selection */}
@@ -221,10 +222,10 @@ const WalletPage = () => {
         {/* Show the cash out button */}
         <TouchableOpacity
           onPress={handleWithdraw}
-          disabled={withdrawAmount < 50000 || !selectedChannel}
+          disabled={withdrawAmount < 5000000 || !selectedChannel}
           style={[
             styles.cashOutButton,
-            withdrawAmount < 50000 || !selectedChannel ? styles.disabledCashOutButton : {},
+            withdrawAmount < 5000000 || !selectedChannel ? styles.disabledCashOutButton : {},
           ]}
         >
           <Text style={styles.cashOutButtonText}>Cash Out</Text>

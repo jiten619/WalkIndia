@@ -4,7 +4,7 @@ import CircularProgress from 'react-native-circular-progress-indicator';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
 import { Accelerometer } from 'expo-sensors';
-import store from './store';
+import { store } from './store';
 import { LineChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
@@ -45,7 +45,7 @@ const StepRecordPage = ({ recordName }) => {
       const date = new Date(today);
       date.setDate(today.getDate() - i);
       formattedDate = date.toISOString().split('T')[0];
-      return fetch(`http://192.168.1.5:3000/steps?date=${formattedDate}`);
+      return fetch(`https://steadily-lucky-burro.ngrok-free.app/steps?date=${formattedDate}`);
     });
   
     // resolve all promises simultaneously

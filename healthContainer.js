@@ -5,6 +5,7 @@ import FoundationIcon from 'react-native-vector-icons/Foundation';
 import { Accelerometer } from 'expo-sensors';
 import { useNavigation } from '@react-navigation/native';
 
+
 const TodayHealthDataContainer = () => {
   const navigation = useNavigation();
   const [distanceWalked, setDistanceWalked] = React.useState(0); // distance walked in km
@@ -28,6 +29,9 @@ const TodayHealthDataContainer = () => {
 
     return () => subscription.remove();
   }, []);
+
+
+  
 
   return (
     <View style={styles.container}>

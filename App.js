@@ -2,7 +2,8 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Provider } from 'react-redux';
-import store from './store';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './store';
 import Constants from 'expo-constants';
 import HomeScreen from './HomeScreen';
 import TaskScreen from './TaskScreen';
@@ -23,6 +24,7 @@ const App = () => {
 
   return (
     <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName="Home"
@@ -44,6 +46,7 @@ const App = () => {
             <Stack.Screen name="StepsRecord" component={StepRecordPage} options={{ title: 'Welcome', headerShown: false }} />
           </Stack.Navigator>
         </NavigationContainer>
+        </PersistGate>
     </Provider>
   );
 };
